@@ -1,0 +1,104 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    container_name: sikap-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=sikap_db
+      - DB_USERNAME=sikapiapsby
+      - DB_PASSWORD=P@ssw0rd
+
+    volumes:
+      - .:/app
+
+    ports:
+      - "8001:8080"
+      
+    restart: unless-stopped
+    
+    networks:
+      - sikap-app-network
+      
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: sikapiapsby
+      POSTGRES_PASSWORD: P@ssw0rd
+      POSTGRES_DB: sikap_db
+
+    volumes:
+        - "postgres_data:/var/lib/postgresql/data"
+
+    ports:
+      - "5432:5432"
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "sikapiapsby", "-d", "sikap_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    networks:
+      - sikap-app-network
+
+  redis:
+    image: redis:latest
+    container_name: redis_cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - sikap-app-network
+
+# Worker untuk Laravel Queue
+  queue_worker:
+    build: .
+    container_name: queue_worker
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - QUEUE_CONNECTION=redis
+      - REDIS_HOST=redis
+    command: ["php", "artisan", "queue:listen", "--queue=default", "--tries=3", "--timeout=60"]
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - sikap-app-network
+
+volumes:
+  postgres_data:
+    name: postgres_data
+  redis_data:
+    name: redis_data
+
+networks:
+  sikap-app-network:
+    driver: bridge
