@@ -1,4 +1,4 @@
-<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+<aside id="app-sidebar" class="app-sidebar bg-primary-substle elevation-4" data-bs-theme="dark">
     <div class="sidebar-brand">
         <a href="{{ url('/') }}" class="brand-link">
             <img src="{{ asset('adminlte/dist/assets/img/AdminLTELogo.png') }}" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
