@@ -10,6 +10,7 @@ class Employee extends Model
     use HasFactory;
 
     protected $fillable = [
+        'employee_id',
         'work_unit_id',
         'position',
         'in_date',
@@ -19,6 +20,11 @@ class Employee extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasOne(User::class, 'employee_id');
+    }
+    
+    public function workUnit()
+    {
+        return $this->belongsTo(WorkUnit::class, 'work_unit_id');
     }
 }

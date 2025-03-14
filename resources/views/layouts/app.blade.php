@@ -17,8 +17,9 @@
         }
     </style>
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css"> -->
+    <script src="https://kit.fontawesome.com/f9d087d068.js" crossorigin="anonymous"></script>
 </head>
-<body class="layout-fixed sidebar-expand-lg bg-body-secondary">
+<body class="layout-fixed sidebar-expand-lg sidebar-mini bg-body-secondary">
     <div class="app-wrapper">
         @include('layouts.navbar')
         @include('layouts.sidebar')
