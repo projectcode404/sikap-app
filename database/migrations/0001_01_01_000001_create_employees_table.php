@@ -11,11 +11,17 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('employee_id')->unique();
-            $table->unsignedBigInteger('work_unit_id');
-            $table->string('position');
-            $table->date('in_date');
+            $table->string('name');
+            $table->unsignedBigInteger('position_id');
+            $table->unsignedBigInteger('division_id')->nullable();
+            $table->unsignedBigInteger('work_unit_id')->nullable();
+            $table->enum('level', ['operative','staff','supervisor','manager']);
+            $table->enum('employment_type', ['permanent','contract']);
+            $table->string('vendor_name')->nullable();
+            $table->date('in_date')->nullable();
             $table->date('out_date')->nullable();
             $table->enum('status', ['active','inactive'])->default('active');
+            $table->string('photo')->nullable();
             $table->timestamps();
         });
     }

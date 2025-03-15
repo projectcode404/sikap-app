@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('work_units', function (Blueprint $table) {
+        Schema::create('positions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('work_unit_id')->unique();
-            $table->string('name')->unique();
-            $table->enum('type', ['stock_point','depo','dc','office']);
             $table->timestamps();
         });
     }
@@ -25,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('work_units');
+        Schema::dropIfExists('positions');
     }
 };

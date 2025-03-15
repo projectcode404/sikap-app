@@ -11,20 +11,39 @@ class Employee extends Model
 
     protected $fillable = [
         'employee_id',
+        'name',
+        'position_id',
+        'division_id',
         'work_unit_id',
-        'position',
+        'level',
+        'employment_type',
+        'vendor_name',
         'in_date',
         'out_date',
         'status',
+        'photo',
     ];
 
     public function user()
     {
         return $this->hasOne(User::class, 'employee_id');
     }
-    
-    public function workUnit()
+
+    protected static function boot()
     {
-        return $this->belongsTo(WorkUnit::class, 'work_unit_id');
+        parent::boot();
+
+        static::created(function ($employee) {
+            $role = $employee->level;
+
+            $user = User::create([
+                'employee_id' => $employee->id,
+                'name' => null,
+                'email' => null, 
+                'password' => Hash::make('P@ssw0rd'),
+                'role' => $role !=='manager' ? 'employee' : $role,
+                'status' => 'active',
+            ]);
+        });
     }
 }

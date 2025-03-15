@@ -9,11 +9,9 @@ class WorkUnit extends Model
 {
     use HasFactory;
 
-    protected $table = 'work_units';
-
     protected $fillable = [
+        'work_unit_id',
         'name',
-        'location',
         'type'
     ];
 }

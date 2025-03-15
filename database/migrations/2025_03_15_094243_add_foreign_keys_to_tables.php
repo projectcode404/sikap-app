@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('work_units', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('work_unit_id')->unique();
-            $table->string('name')->unique();
-            $table->enum('type', ['stock_point','depo','dc','office']);
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('employee_id')->references('employee_id')->on('employees')->onDelete('cascade');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('work_units');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['employee_id']);
+        });
     }
 };

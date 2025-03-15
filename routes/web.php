@@ -7,18 +7,17 @@ Route::get('/', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    //Users
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
 
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-});
 
-// Route::middleware('auth')->group(function () {
-//     Route::get('/users', [UserController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/users', [UserController::class, 'update'])->name('profile.update');
-//     Route::delete('/users', [UserController::class, 'destroy'])->name('profile.destroy');
-// });
+    
+    //Employee
+    Route::resource('employees', EmployeeController::class);
+});
 
 require __DIR__.'/auth.php';
