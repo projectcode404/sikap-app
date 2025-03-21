@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use App\Models\User;
 
 class Employee extends Model
 {
@@ -11,7 +14,19 @@ class Employee extends Model
 
     protected $fillable = [
         'employee_id',
-        'name',
+        'full_name',
+        'address',
+        'birth_place',
+        'birth_date',
+        'gender',
+        'religion',
+        'education',
+        'phone',
+        'email',
+        'ktp_number',
+        'npwp_number',
+        'bpjs_health',
+        'bpjs_employee',
         'position_id',
         'division_id',
         'work_unit_id',
@@ -20,13 +35,14 @@ class Employee extends Model
         'vendor_name',
         'in_date',
         'out_date',
+        'notes',
         'status',
         'photo',
     ];
 
     public function user()
     {
-        return $this->hasOne(User::class, 'employee_id');
+        return $this->hasOne(User::class, 'employee_id', 'employee_id');
     }
 
     protected static function boot()
@@ -34,16 +50,24 @@ class Employee extends Model
         parent::boot();
 
         static::created(function ($employee) {
-            $role = $employee->level;
+            if (!User::where('employee_id', $employee->employee_id)->exists()) {
+                $role = $employee->level !== 'manager' ? 'employee' : 'manager';
 
-            $user = User::create([
-                'employee_id' => $employee->id,
-                'name' => null,
-                'email' => null, 
-                'password' => Hash::make('P@ssw0rd'),
-                'role' => $role !=='manager' ? 'employee' : $role,
-                'status' => 'active',
-            ]);
+                $user = User::create([
+                    'id' => Str::uuid(),
+                    'employee_id' => $employee->employee_id,
+                    'name' => $employee->full_name . '_' . $employee->employee_id,
+                    'email' => $employee->email,
+                    'password' => Hash::make('P@ssw0rd'),
+                    'status' => 'active',
+                ]);
+
+                $user->assignRole($role);
+            }
+        });
+
+        static::deleting(function ($employee) {
+            User::where('employee_id', $employee->employee_id)->delete();
         });
     }
 }

@@ -4,15 +4,22 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Division;
 
 class DivisionSeeder extends Seeder
 {
     public function run(): void
     {
         $divisions = [
-            'Noodle',
-            'Non-Noodle',
-            'AMDK',
+            'Exclusive Noodle',
+            'Exclusive Noodle Virtual',
+            'Exclusive Non-Noodle',
+            'Exclusive Non-Noodle Virtual',
+            'Exclusive ILO',
+            'Exclusive Tepung',
+            'CLUB',
+            'CLUB Virtual',
+            'Canvass',
         ];
 
         foreach ($divisions as $division) {

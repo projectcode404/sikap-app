@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Position;
 
 class PositionSeeder extends Seeder
 {
@@ -11,7 +12,7 @@ class PositionSeeder extends Seeder
     {
         $positions = [
             'Branch Manager',
-            'Oficce Manager',
+            'Office Manager',
             'Sales Manager',
             'Distribution Center Manager',
             'Personalia & General Affair Manager',
@@ -29,7 +30,7 @@ class PositionSeeder extends Seeder
         ];
 
         foreach ($positions as $position) {
-            Position::create(['name' => $position]);
+            Position::firstOrCreate(['name' => $position]);
         }
     }
 }

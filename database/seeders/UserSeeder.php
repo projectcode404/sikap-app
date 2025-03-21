@@ -2,21 +2,48 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'employee_id' => 1,
-            'name' => 'superman',
-            'email' => 'superman@localhost.com',
-            'password' => Hash::make('supermanisdead'),
-            'role' => 'admin',
+        $adminRole = Role::where('name', 'admin')->firstOrFail();
+        $managerRole = Role::where('name', 'manager')->firstOrFail();
+        $employeeRole = Role::where('name', 'employee')->firstOrFail();
+        
+        $superAdmin = User::create([
+            'id' => Str::uuid(),
+            'employee_id' => null,
+            'name' => 'superadmin',
+            'email' => 'superadmin@sikap-app.dev',
+            'password' => Hash::make('SuperAdmin1'),
+            'status' => 'active',
         ]);
+        $superAdmin->assignRole($adminRole);
+
+        $superManager = User::create([
+            'id' => Str::uuid(),
+            'employee_id' => null,
+            'name' => 'supermanager',
+            'email' => 'supermanager@sikap-app.dev',
+            'password' => Hash::make('SuperManager1'),
+            'status' => 'active',
+        ]);
+        $superManager->assignRole($managerRole);
+
+        $employee = User::create([
+            'id' => Str::uuid(),
+            'employee_id' => null,
+            'name' => 'employeeuser',
+            'email' => 'employee@sikap-app.dev',
+            'password' => Hash::make('Employee123'),
+            'status' => 'active',
+        ]);
+        $employee->assignRole($employeeRole);
     }
 }

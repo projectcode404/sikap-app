@@ -36,17 +36,18 @@ class EmployeeController extends Controller
 
         $employee = Employee::create([
             'employee_id' => $request->employee_id,
-            'name' => $request->name,
+            'full_name' => $request->full_name,
+            'address' => $request->address,
+            'birth_place' => $request->birth_place,
+            'birth_date' => $request->birth_date,
+            'gender' => $request->gender,
+            'religion' => $request->religion,
+            'education' =>$request->education,
             'position_id' => $request->position_id,
-            'division_id' => $request->division_id,
-            'work_unit_id' => $request->work_unit_id,
-            'position_id' => $request->position_id,
-            'level' => $request->level,
             'employment_type' => $request->employment_type,
+            'vendor' => $request->vendor,
             'in_date' => $request->in_date,
-            'vendor_name' => $request->vendor_name,
-            'status' => 'active',
-            'level' => $request->level,
+            'status' => $request->status,
         ]);
 
         return redirect()->route('employees.create')->with('success', 'Employee & User created successfully.');
@@ -76,17 +77,18 @@ class EmployeeController extends Controller
 
         $employee->update([
             'employee_id' => $request->employee_id,
-            'name' => $request->name,
+            'full_name' => $request->full_name,
+            'address' => $request->address,
+            'birth_place' => $request->birth_place,
+            'birth_date' => $request->birth_date,
+            'gender' => $request->gender,
+            'religion' => $request->religion,
+            'education' =>$request->education,
             'position_id' => $request->position_id,
-            'division_id' => $request->division_id,
-            'work_unit_id' => $request->work_unit_id,
-            'position_id' => $request->position_id,
-            'level' => $request->level,
             'employment_type' => $request->employment_type,
+            'vendor' => $request->vendor,
             'in_date' => $request->in_date,
-            'vendor_name' => $request->vendor_name,
-            'status' => 'active',
-            'level' => $request->level,
+            'status' => $request->status,
         ]);
 
         return redirect()->route('employees.edit')->with('success', 'Employee updated successfully.');
