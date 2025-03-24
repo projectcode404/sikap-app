@@ -44,7 +44,7 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ url('/users') }}" class="nav-link">
                         <i class="nav-icon fa-solid fa-users"></i>
                         <p>Users</p>
                     </a>

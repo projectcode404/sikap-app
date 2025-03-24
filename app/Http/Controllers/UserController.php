@@ -15,6 +15,27 @@ class UserController extends Controller
         $users = User::with('roles')->get();
         return view('users.index', compact('users'));
     }
+
+    public function getUsers()
+    {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $users = User::select('employee_id', 'name', 'email', 'status')
+                    ->with('roles')
+                    ->get()
+                    ->map(function ($user) {
+                        return [
+                            'employee_id' => $user->employee_id,
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'status' => $user->status,
+                        ];
+                    });
+
+        return response()->json($users);
+    }
     
     public function create()
     {
