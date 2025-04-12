@@ -10,31 +10,32 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index()
+    public function getUsers(Request $request)
     {
-        $users = User::with('roles')->get();
-        return view('users.index', compact('users'));
-    }
-
-    public function getUsers()
-    {
-        if (!auth()->check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        if (!$request->ajax()) {
+            return abort(404, 'Not Found');
         }
 
-        $users = User::select('employee_id', 'name', 'email', 'status')
-                    ->with('roles')
-                    ->get()
-                    ->map(function ($user) {
-                        return [
-                            'employee_id' => $user->employee_id,
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'status' => $user->status,
-                        ];
-                    });
+        $users = User::select('id', 'employee_id', 'name', 'email', 'status')
+                ->with('roles:name')
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'employee_id' => $user->employee_id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => $user->roles->pluck('name')->implode(', '),
+                        'status' => $user->status,
+                    ];
+                });
 
         return response()->json($users);
+    }
+    
+    public function index()
+    {
+        return view('users.index');
     }
     
     public function create()

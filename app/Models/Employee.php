@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\Division;
+use App\Models\Position;
 
 class Employee extends Model
 {
@@ -43,6 +45,16 @@ class Employee extends Model
     public function user()
     {
         return $this->hasOne(User::class, 'employee_id', 'employee_id');
+    }
+
+    public function division()
+    {
+        return $this->belongsTo(Division::class, 'division_id');
+    }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class, 'position_id');
     }
 
     protected static function boot()

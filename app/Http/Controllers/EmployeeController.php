@@ -6,15 +6,46 @@ use App\Models\Employee;
 use App\Models\User;
 use App\Models\WorkUnit;
 use App\Models\Position;
+use App\Models\Division;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
+    public function getEmployees(Request $request)
+    {
+        if (!$request->ajax()) {
+            return abort(404, 'Not Found');
+        }
+
+        $employees = Employee::select('employee_id', 'full_name', 'gender', 'phone', 'level', 'position_id', 'division_id', 'employment_type', 'vendor_name', 'status')
+                ->with([
+                    'division:id,name',
+                    'position:id,name',
+                ])
+                ->get()
+                ->map(function ($employee) {
+                    return [
+                        'employee_id' => $employee->employee_id,
+                        'full_name' => $employee->full_name,
+                        'gender' => $employee->gender,
+                        'phone' => $employee->phone,
+                        'level' => $employee->level,
+                        'position' => optional($employee->position)->name ?? '-',
+                        'division' => optional($employee->division)->name ?? '-',
+                        'employment_type' => $employee->employment_type,
+                        'vendor' => $employee->vendor_name,
+                        'status' => $employee->status,
+                    ];
+                });
+
+        return response()->json($employees);
+    }
+
     public function index()
     {
-        $employees = Employee::with('user', 'workUnit', 'position')->get();
-        return view('employees.index', compact('employees'));
+        // $employees = Employee::with('user', 'workUnit', 'position')->get();
+        return view('employees.index');
     }
     
     public function create()

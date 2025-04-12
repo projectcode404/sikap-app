@@ -24,19 +24,25 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ url('/employees') }}" class="nav-link">
                                 <i class="nav-icon bi bi-circle"></i>
                                 <p>Employees</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ url('/divisions') }}" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Divisions</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('/positions') }}" class="nav-link">
                                 <i class="nav-icon bi bi-circle"></i>
                                 <p>Positions</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ url('/work-units') }}" class="nav-link">
                                 <i class="nav-icon bi bi-circle"></i>
                                 <p>Work Units</p>
                             </a>
