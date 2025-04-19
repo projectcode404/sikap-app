@@ -33,7 +33,7 @@
                 { headerName: "Status", field: "status", minWidth: 100, maxWidth: 120, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".users-grid", usersColumn, "{{ route('users.api') }}");
+            initializeAGGrid(".users-grid", usersColumn, "{{ route('user.users.api') }}");
         });
     </script>
 @endsection

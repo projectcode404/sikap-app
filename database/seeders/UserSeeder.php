@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
+use App\Models\User\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
         $managerRole = Role::where('name', 'manager')->firstOrFail();
         $employeeRole = Role::where('name', 'employee')->firstOrFail();
         
-        $superAdmin = User::create([
+        $superAdmin = User::firstOrCreate([
             'id' => Str::uuid(),
             'employee_id' => null,
             'name' => 'superadmin',
@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
         ]);
         $superAdmin->assignRole($adminRole);
 
-        $superManager = User::create([
+        $superManager = User::firstOrCreate([
             'id' => Str::uuid(),
             'employee_id' => null,
             'name' => 'supermanager',
@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
         ]);
         $superManager->assignRole($managerRole);
 
-        $employee = User::create([
+        $employee = User::firstOrCreate([
             'id' => Str::uuid(),
             'employee_id' => null,
             'name' => 'employeeuser',

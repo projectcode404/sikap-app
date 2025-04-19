@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Employee;
+use App\Models\Employee\Employee;
 use Illuminate\Support\Facades\Hash;
 
 class EmployeeSeeder extends Seeder

@@ -199,22 +199,38 @@ async function fetchData(gridOptions, apiRoute, gridSelector) {
 
 // 🔹 Fungsi untuk menambahkan event listener ke tombol Edit dan Delete
 function attachEventListeners(gridSelector) {
-    document.querySelectorAll(`${gridSelector} .edit-btn`).forEach(button => {
-        button.addEventListener("click", function () {
-            const id = this.getAttribute("data-id");
-            console.log(`📝 Edit data dengan ID: ${id}`);
-            // Tambahkan logika untuk edit data di sini
-        });
-    });
+    const gridDiv = document.querySelector(gridSelector);
 
-    document.querySelectorAll(`${gridSelector} .delete-btn`).forEach(button => {
-        button.addEventListener("click", function () {
-            const id = this.getAttribute("data-id");
-            console.log(`🗑️ Delete data dengan ID: ${id}`);
+    // Hindari pasang listener dua kali
+    if (gridDiv.classList.contains('listeners-attached')) return;
+    gridDiv.classList.add('listeners-attached');
+
+    gridDiv.addEventListener("click", function (e) {
+        const editBtn = e.target.closest(".edit-btn");
+        const deleteBtn = e.target.closest(".delete-btn");
+
+        if (editBtn) {
+            const id = editBtn.getAttribute("data-id");
+            const [module, resource] = window.location.pathname.split('/').filter(Boolean); // misal ['atk', 'stock']
+            const editUrl = `/${module}/${resource}/${id}/edit`;
+
+            console.log(`📝 Edit diklik! ID: ${id}`);
+            console.log(`🔗 Edit URL: ${editUrl}`);
+            // window.location.href = editUrl; // uncomment kalau mau langsung redirect
+        }
+
+        if (deleteBtn) {
+            const id = deleteBtn.getAttribute("data-id");
+            const [module, resource] = window.location.pathname.split('/').filter(Boolean);
+            const deleteUrl = `/${module}/${resource}/${id}`;
+
+            console.log(`🗑️ Delete diklik! ID: ${id}`);
+            console.log(`🔗 Delete URL: ${deleteUrl}`);
+
             if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                deleteData(id);
+                deleteData(deleteUrl);
             }
-        });
+        }
     });
 }
 

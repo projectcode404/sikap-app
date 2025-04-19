@@ -1,11 +1,53 @@
-/vendor/
-node_modules/
-storage/
-bootstrap/cache/
-.env
-.env.example
-.idea/
-.vscode/
-.DS_Store
+# Laravel & Composer
+/vendor
+/node_modules
 /public/storage
-/public/hot
+/storage/*.key
+.env
+.env.*.backup
+.env.backup
+.env.local
+Homestead.yaml
+Homestead.json
+
+# Laravel Storage
+/storage/app/public
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Laravel IDE Helper
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
+
+# Laravel Telescope
+storage/telescope
+
+# Laravel Nova
+nova-components
+
+# Cache & Logs
+*.log
+*.cache
+*.lock
+*.tmp
+
+# System/OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# VS Code & JetBrains IDEs
+.vscode
+.idea
+*.iml
+
+# Git Conflicts / Backups
+*.orig
+*.rej
+
+# Custom Exclude
+bootstrap/cache/*.php

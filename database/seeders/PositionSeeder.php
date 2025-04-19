@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Position;
+use App\Models\Employee\Position;
 
 class PositionSeeder extends Seeder
 {

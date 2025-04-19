@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\WorkUnit;
+use App\Models\Employee\WorkUnit;
 
 class WorkUnitSeeder extends Seeder
 {
