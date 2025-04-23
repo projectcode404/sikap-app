@@ -8,14 +8,12 @@
 
 @section('content')
 <div class="container">
-    <h2>Users List</h2>
-
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
+    <div class="mb-3 pt-3 d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">User List</h2>
+        <a href="{{ route('user.users.create') }}" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Add User
+        </a>
+    </div>
     <div id="sikapGrid" class="ag-theme-quartz users-grid" style="height: 500px; width: 100%;"></div>
 </div>
 @endsection
@@ -27,9 +25,8 @@
         document.addEventListener("DOMContentLoaded", function () {
             const usersColumn = [
                 { headerName: "Employee ID", field: "employee_id", minWidth: 150, sortable: true, filter: true },
-                { headerName: "Name", field: "name", minWidth: 250, sortable: true, filter: true },
-                { headerName: "Email", field: "email", minWidth: 250, sortable: true, filter: true },
-                { headerName: "Role", field: "role", minWidth: 150, maxWidth: 150, sortable: true, filter: true },
+                { headerName: "Employee Name", field: "full_name", minWidth: 500, sortable: true, filter: true },
+                { headerName: "Role", field: "role", minWidth: 150, maxWidth: 300, sortable: true, filter: true },
                 { headerName: "Status", field: "status", minWidth: 100, maxWidth: 120, sortable: true, filter: true },
             ];
 

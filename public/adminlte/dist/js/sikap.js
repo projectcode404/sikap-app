@@ -216,7 +216,7 @@ function attachEventListeners(gridSelector) {
 
             console.log(`📝 Edit diklik! ID: ${id}`);
             console.log(`🔗 Edit URL: ${editUrl}`);
-            // window.location.href = editUrl; // uncomment kalau mau langsung redirect
+            window.location.href = editUrl; // uncomment kalau mau langsung redirect
         }
 
         if (deleteBtn) {
@@ -243,4 +243,27 @@ async function deleteData(id) {
     }, 1000);
 }
 // End AG Grid
+
+// Tom Select
+function initTomSelectAjax(selector, url, placeholder = 'Cari...', extraConfig = {}) {
+    if (!document.querySelector(selector)) return;
+
+    new TomSelect(selector, {
+        valueField: 'id',
+        labelField: 'text',
+        searchField: 'text',
+        placeholder: placeholder,
+        load: function(query, callback) {
+            if (!query.length) return callback();
+            const urlWithQuery = `${url}?q=${encodeURIComponent(query)}`;
+        
+            fetch(urlWithQuery)
+                .then(response => response.json())
+                .then(results => callback(results))
+                .catch(() => callback());
+        },
+        ...extraConfig
+    });
+}
+// End Tom Select
 

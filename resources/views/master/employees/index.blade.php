@@ -36,7 +36,7 @@
                     { headerName: "Status", field: "status", minWidth: 100, maxWidth: 120, sortable: true, filter: true }
             ];
 
-            initializeAGGrid(".employees-grid", employeesColumn, "{{ route('employee.employees.api') }}");
+            initializeAGGrid(".employees-grid", employeesColumn, "{{ route('master.employees.api') }}");
         });
     </script>
 @endsection

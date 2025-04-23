@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Employee\Position;
+use App\Models\Master\Position;
 
 class PositionSeeder extends Seeder
 {
@@ -15,17 +15,26 @@ class PositionSeeder extends Seeder
             'Office Manager',
             'Sales Manager',
             'Distribution Center Manager',
-            'Personalia & General Affair Manager',
-            'General Affair', 
-            'Personalia & Human Resource', 
-            'Finance',
-            'Salesman',
-            'Stock Point Officer',
-            'Stock Point Clerk',
-            'Staff Collection & Admin Stock',
-            'Sales Service',
+            'Personnel & General Affair Manager',
+            'General Affairs Officer', 
+            'Human Resource Officer', 
+            'Finance Supervisor',
+            'Finance Officer',
+            'EDP Supervisor',
+            'EDP Officer',
+            'Admin Stock Handling Supervisor',
+            'Admin Stock Handling Officer',
+            'Sales Supervisor',
+            'Account Salesman',
+            'Canvass Salesman',
+            'Canvass Driver',
+            'Deliveryman',
+            'Delivery Driver',
             'Picker Packer',
-            'Delivery Man',
+            'Stock Point Control Supervisor',
+            'Stock Point Controller',
+            'Junior Stock Point Officer',
+            'Staff Collection & Adm Stock',
             'Security'
         ];
 

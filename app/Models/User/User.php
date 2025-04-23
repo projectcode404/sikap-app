@@ -2,7 +2,7 @@
 
 namespace App\Models\User;
 
-use App\Models\Employee\Employee;
+use App\Models\Master\Employee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;

@@ -14,35 +14,35 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-item {{ Request::is('employee/*') ? 'menu-open' : '' }}">
+                <li class="nav-item {{ Request::is('master/*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fa-solid fa-user-group"></i>
                         <p>
-                            Employees
+                            Master Data
                             <i class="nav-arrow bi bi-chevron-right"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ url('/employee/data') }}" class="nav-link {{ Request::is('employee/data') ? 'active' : '' }}">
+                            <a href="{{ url('/master/employees') }}" class="nav-link {{ Request::is('master/employees') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-id-card"></i>
                                 <p>Employees</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/employee/divisions') }}" class="nav-link {{ Request::is('employee/divisions') ? 'active' : '' }}">
+                            <a href="{{ url('/master/divisions') }}" class="nav-link {{ Request::is('master/divisions') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-layer-group"></i>
                                 <p>Divisions</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/employee/positions') }}" class="nav-link {{ Request::is('employee/positions') ? 'active' : '' }}">
+                            <a href="{{ url('/master/positions') }}" class="nav-link {{ Request::is('master/positions') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-briefcase"></i>
                                 <p>Positions</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/employee/work-units') }}" class="nav-link {{ Request::is('employee/work-units') ? 'active' : '' }}">
+                            <a href="{{ url('/master/work-units') }}" class="nav-link {{ Request::is('master/work-units') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-building-user"></i>
                                 <p>Work Units</p>
                             </a>
@@ -90,11 +90,28 @@
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ url('/user/data') }}" class="nav-link {{ Request::is('user/data') ? 'active' : '' }}">
+                <li class="nav-item {{ Request::is('user/*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fa-solid fa-users"></i>
-                        <p>Users</p>
+                        <p>
+                            Users
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ url('/user/users') }}" class="nav-link {{ Request::is('user/users*') ? 'active' : '' }}">
+                                <i class="nav-icon fa-solid fa-user-check"></i>
+                                <p>Users</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('/user/roles') }}" class="nav-link {{ Request::is('user/roles*') ? 'active' : '' }}">
+                                <i class="nav-icon fa-solid fa-shield-halved"></i>
+                                <p>Role & Permission</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>

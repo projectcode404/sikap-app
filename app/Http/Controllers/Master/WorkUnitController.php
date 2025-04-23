@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Employee;
+namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Models\Employee\WorkUnit;
+use App\Models\Master\WorkUnit;
 use Illuminate\Http\Request;
 
 class WorkUnitController extends Controller
 {
     public function index()
     {
-        return view('employee.work-units.index');
+        return view('master.work-units.index');
     }
 
     public function getWorkUnits(Request $request)

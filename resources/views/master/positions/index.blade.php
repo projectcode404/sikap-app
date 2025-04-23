@@ -8,7 +8,7 @@
 
 @section('content')
 <div class="container">
-    <h2>Divisions List</h2>
+    <h2>Positions List</h2>
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <div id="sikapGrid" class="ag-theme-quartz divisions-grid" style="height: 500px; width: 100%;"></div>
+    <div id="sikapGrid" class="ag-theme-quartz positions-grid" style="height: 500px; width: 100%;"></div>
 </div>
 @endsection
 
@@ -25,12 +25,12 @@
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@33.1.1/dist/ag-grid-community.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const divisionsColumn = [
+            const positionsColumn = [
                     { headerName: "ID", field: "id", minWidth: 150, maxWidth: 150, sortable: true, filter: true },
-                    { headerName: "Division", field: "name", minWidth: 250, sortable: true, filter: true },
+                    { headerName: "position", field: "name", minWidth: 250, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".divisions-grid", divisionsColumn, "{{ route('employee.divisions.api') }}");
+            initializeAGGrid(".positions-grid", positionsColumn, "{{ route('master.positions.api') }}");
         });
     </script>
 @endsection

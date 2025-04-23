@@ -4,10 +4,12 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User\User;
+use App\Models\Master\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 {
@@ -17,15 +19,14 @@ class UserController extends Controller
             return abort(404, 'Not Found');
         }
 
-        $users = User::select('id', 'employee_id', 'name', 'email', 'status')
-                ->with('roles:id,name')
+        $users = User::select('id', 'employee_id', 'status')
+                ->with(['roles:id,name'],['employee:id,employee_id,full_name'])
                 ->get()
                 ->map(function ($user) {
                     return [
                         'id' => $user->id,
                         'employee_id' => $user->employee_id,
-                        'name' => $user->name,
-                        'email' => $user->email,
+                        'full_name' => optional($user->employee)->full_name ?? '-',
                         'role' => $user->roles->pluck('name')->implode(', '),
                         'status' => $user->status,
                     ];
@@ -33,40 +34,82 @@ class UserController extends Controller
 
         return response()->json($users);
     }
+
+    public function getAvailableEmployees(Request $request)
+    {
+        if (!$request->ajax() && !$request->has('select') && !$request->has('q')) {
+            return abort(404, 'Not Found');
+        }
+
+        $search = $request->q;
+
+        $employees = Employee::where('status', 'active')
+            ->whereNotIn('employee_id', function ($query) {
+                $query->select('employee_id')->from('users')->whereNotNull('employee_id');
+            })
+            ->when($search, function ($q) use ($search) {
+                $q->where('employee_id', 'ILIKE', "%$search%")
+                ->orWhere('full_name', 'ILIKE', "%$search%");
+            })
+            ->limit(20)
+            ->get()
+            ->map(function ($e) {
+                return [
+                    'id' => $e->employee_id,
+                    'text' => "{$e->employee_id} - {$e->full_name}",
+                ];
+            });
+
+        return response()->json($employees);
+    }
     
     public function index()
     {
-        return view('users.index');
+        return view('user.users.index');
     }
     
     public function create()
     {
-        return view('users.create');
+        $roles = Role::all();
+        return view('user.users.create', compact('roles'));
+    }
+
+    public function edit(User $user)
+    {
+        $roles = Role::all();
+        return view('user.users.create', compact('user', 'roles'));
     }
 
     public function store(Request $request)
     {
-        $emailRule = 'nullable|email|unique:users,email';
-
         $request->validate([
-            'name' => 'required',
-            'email' => $emailRule,
-            'password' => 'required|min:6',
-            'role' => 'required|exists:roles,name',
+            'employee_id' => 'required|exists:employees,employee_id',
+            'roles' => 'required|array',
+            'roles.*' => 'exists:roles,name',
         ]);
+
+        // Cek apakah employee_id sudah dipakai user
+        if (User::where('employee_id', $request->employee_id)->exists()) {
+            return redirect()->back()->withErrors([
+                'employee_id' => 'User with this employee ID is already exists.',
+            ]);
+        }
+
+        $employee = Employee::where('employee_id', $request->employee_id)->firstOrFail();
+
+        // Default password
+        $password = 'Iapsby' . $employee->employee_id;
 
         $user = User::create([
             'id' => Str::uuid(),
-            'employee_id' => null,
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'employee_id' => $employee->employee_id,
+            'password' => Hash::make($password),
             'status' => 'active',
         ]);
 
-        $user->assignRole($request->role);
+        $user->syncRoles($request->roles);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        return redirect()->route('user.users.index')->with('success', 'Successfully created new user.');
     }
 
     public function show(User $user)
@@ -74,42 +117,45 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function edit(User $user)
-    {
-        $roles = Role::pluck('name', 'name');
-        return view('users.edit', compact('user'));
-    }
-
     public function update(Request $request, User $user)
     {
-        $emailRule = 'nullable|email';
-        if ($request->email) {
-            $emailRule .= '|unique:users,email,' . $user->id;
+        $request->validate([
+            'password' => 'nullable|min:6|confirmed',
+            'status' => 'required|in:active,inactive',
+            'roles' => 'required|array',
+            'roles.*' => 'exists:roles,name',
+        ]);
+
+        // Update status
+        $user->status = $request->status;
+
+        $user->save();
+
+        // Update roles
+        $user->syncRoles($request->roles);
+
+        return redirect()->route('user.users.index')->with('success', 'Successfully updated user.');
+    }
+
+    public function resetPassword(User $user)
+    {
+        $employeeId = $user->employee_id;
+
+        if (!$employeeId) {
+            return redirect()->back()->with('error', 'Employee ID not found.');
         }
 
-        $request->validate([
-            'name' => 'required|unique:users,name,' . $user->id,
-            'email' => $emailRule,
-            'password' => 'nullable|min:6',
-            'role' => 'required|exists:roles,name',
-            'status' => 'required|in:active,inactive',
-        ]);
-
+        $defaultPassword = 'Iapsby' . $employeeId;
         $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'status' => $request->status,
-            'password' => $request->password ? Hash::make($request->password) : $user->password,
+            'password' => Hash::make($defaultPassword),
         ]);
 
-        $user->syncRoles([$request->role]);
-
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return redirect()->route('user.users.index')->with('success', 'Successfully reset '.$user->employee_id.' password to default.');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        return redirect()->route('user.users.index')->with('success', 'User deleted successfully.');
     }
 }

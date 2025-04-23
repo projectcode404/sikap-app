@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Employee;
+namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Models\Master\Division;
 use Illuminate\Http\Request;
-use App\Models\Employee\Division;
 
 class DivisionController extends Controller
 {
     public function index()
     {
-        return view('employee.divisions.index');
+        return view('master.divisions.index');
     }
 
     public function getDivisions(Request $request)

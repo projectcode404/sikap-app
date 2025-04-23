@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Employee\Division;
+use App\Models\Master\Division;
 
 class DivisionSeeder extends Seeder
 {
@@ -23,7 +23,7 @@ class DivisionSeeder extends Seeder
         ];
 
         foreach ($divisions as $division) {
-            Division::create(['name' => $division]);
+            Division::firstOrCreate(['name' => $division]);
         }
     }
 }
