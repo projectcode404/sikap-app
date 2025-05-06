@@ -156,6 +156,11 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
+
+        if (request()->ajax() || request()->expectsJson()) {
+            return response()->json(['message' => 'User deleted successfully.'], 200);
+        }
+
         return redirect()->route('user.users.index')->with('success', 'User deleted successfully.');
     }
 }

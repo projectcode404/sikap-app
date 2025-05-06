@@ -47,6 +47,12 @@
                                 <p>Work Units</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ url('/master/suppliers') }}" class="nav-link {{ Request::is('master/suppliers') ? 'active' : '' }}">
+                                <i class="nav-icon fa-solid fa-building-columns"></i>
+                                <p>suppliers</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li class="nav-item {{ Request::is('atk/*') ? 'menu-open' : '' }}">

@@ -8,14 +8,12 @@
 
 @section('content')
 <div class="container">
-    <h2>ATK List</h2>
-
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
+    <div class="mb-3 pt-3 d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">ATK List</h2>
+        <a href="{{ route('atk.stock.create') }}" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Add ATK
+        </a>
+    </div>
     <div id="sikapGrid" class="ag-theme-quartz atk-stock-grid" style="height: 500px; width: 100%;"></div>
 </div>
 @endsection

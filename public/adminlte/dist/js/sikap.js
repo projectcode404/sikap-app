@@ -126,15 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 //End Color Mode Toggler
 
-// AG Grid
+// AG Grid (Community, Browser version)
 async function initializeAGGrid(gridSelector, columnDefs, apiRoute) {
     const gridDiv = document.querySelector(gridSelector);
-    if (!gridDiv) {
-        console.error(`❌ Elemen ${gridSelector} tidak ditemukan.`);
-        return;
-    }
+    if (!gridDiv) return;
 
-    // Tambahkan kolom aksi untuk Edit dan Delete
     columnDefs.push({
         headerName: "Actions",
         field: "actions",
@@ -153,99 +149,116 @@ async function initializeAGGrid(gridSelector, columnDefs, apiRoute) {
         filter: false,
     });
 
-    const gridOptions = agGrid.createGrid(gridDiv, {
+    const gridOptions = {
         columnDefs: columnDefs,
         rowData: [],
         pagination: true,
         paginationPageSize: 20,
+        rowModelType: 'clientSide',
         onGridReady: async function (params) {
-            console.log(`✅ AG Grid siap untuk ${gridSelector}, mengambil data...`);
-            gridOptions.api = params.api;
-            await fetchData(gridOptions, apiRoute, gridSelector);
+            window.gridApi = params.api; // ✅ gunakan global gridApi
+            await fetchData(apiRoute, gridSelector);
         }
-    });
+    };
 
-    return gridOptions;
+    agGrid.createGrid(gridDiv, gridOptions);
 }
 
-async function fetchData(gridOptions, apiRoute, gridSelector) {
+
+async function fetchData(apiRoute, gridSelector) {
     try {
-        console.log(`✅ Memulai fetch API untuk ${apiRoute}...`);
         const response = await fetch(apiRoute, {
-            method: "GET",
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: "same-origin"
         });
 
-        if (!response.ok) throw new Error(`❌ Gagal mengambil data dari ${apiRoute}.`);
+        if (!response.ok) throw new Error(`❌ Failed fetch data from ${apiRoute}.`);
 
         const data = await response.json();
-        console.log(`✅ Data diterima dari ${apiRoute}:`, data);
+        if (window.gridApi) {
+            // 🔥 Hapus semua baris dulu
+            const allNodes = [];
+            window.gridApi.forEachNode(node => allNodes.push(node.data));
+            window.gridApi.applyTransaction({ remove: allNodes });
 
-        if (gridOptions.api) {
-            console.log(`✅ Memasukkan data ke AG Grid...`);
-            gridOptions.api.applyTransaction({ add: data });
+            // ✅ Tambahkan data baru
+            window.gridApi.applyTransaction({ add: data });
 
-            // Tunggu sejenak lalu tambahkan event listener untuk tombol aksi
-            setTimeout(() => attachEventListeners(gridSelector), 500);
-        } else {
-            console.warn("❌ AG Grid belum siap, menunggu...");
-            setTimeout(() => fetchData(gridOptions, apiRoute, gridSelector), 500);
+            // Pasang listener ulang
+            setTimeout(() => attachEventListeners(gridSelector), 100);
         }
     } catch (error) {
-        console.error(`❌ Error fetching data dari ${apiRoute}:`, error);
+        console.error(`❌ Error fetch data:`, error);
     }
 }
 
-// 🔹 Fungsi untuk menambahkan event listener ke tombol Edit dan Delete
-function attachEventListeners(gridSelector) {
-    const gridDiv = document.querySelector(gridSelector);
 
-    // Hindari pasang listener dua kali
+// 🔹 Fungsi untuk menambahkan event listener ke tombol Edit dan Delete
+function attachEventListeners(gridSelector, gridOptions) {
+    const gridDiv = document.querySelector(gridSelector);
     if (gridDiv.classList.contains('listeners-attached')) return;
     gridDiv.classList.add('listeners-attached');
 
     gridDiv.addEventListener("click", function (e) {
-        const editBtn = e.target.closest(".edit-btn");
         const deleteBtn = e.target.closest(".delete-btn");
+        const editBtn = e.target.closest(".edit-btn");
 
         if (editBtn) {
-            const id = editBtn.getAttribute("data-id");
-            const [module, resource] = window.location.pathname.split('/').filter(Boolean); // misal ['atk', 'stock']
-            const editUrl = `/${module}/${resource}/${id}/edit`;
-
-            console.log(`📝 Edit diklik! ID: ${id}`);
-            console.log(`🔗 Edit URL: ${editUrl}`);
-            window.location.href = editUrl; // uncomment kalau mau langsung redirect
+            const id = editBtn.dataset.id;
+            const [module, resource] = window.location.pathname.split('/').filter(Boolean);
+            const editUrl = `/${module}/${resource}/${id}`;
+            window.location.href = `${editUrl}/edit`;
         }
 
         if (deleteBtn) {
-            const id = deleteBtn.getAttribute("data-id");
+            const id = deleteBtn.dataset.id;
             const [module, resource] = window.location.pathname.split('/').filter(Boolean);
             const deleteUrl = `/${module}/${resource}/${id}`;
+            const apiUrl = `/${module}/${resource}/api`;
 
-            console.log(`🗑️ Delete diklik! ID: ${id}`);
-            console.log(`🔗 Delete URL: ${deleteUrl}`);
-
-            if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                deleteData(deleteUrl);
-            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Data will be deleted permanently!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Confirm',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    deleteData(deleteUrl, apiUrl, gridSelector, gridOptions);
+                }
+            });
         }
     });
 }
 
-// 🔹 Fungsi untuk menghapus data (simulasi)
-async function deleteData(id) {
-    console.log(`⏳ Menghapus data ID ${id}...`);
-    // Implementasikan AJAX request untuk menghapus data di server jika perlu
-    setTimeout(() => {
-        console.log(`✅ Data dengan ID ${id} berhasil dihapus!`);
-    }, 1000);
+// 🔹 Fungsi untuk menghapus data
+async function deleteData(deleteUrl, apiRoute, gridSelector) {
+    try {
+        const response = await fetch(deleteUrl, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.ok) {
+            showSuccessToast('Data deleted successfully.');
+            await fetchData(apiRoute, gridSelector); // reload grid
+        } else {
+            showErrorToast('Failed to delete data.');
+        }
+    } catch (error) {
+        console.error('❌ Delete error:', error);
+        showErrorToast('Something went wrong while deleting data.');
+    }
 }
 // End AG Grid
 
 // Tom Select
-function initTomSelectAjax(selector, url, placeholder = 'Cari...', extraConfig = {}) {
+function initTomSelectAjax(selector, url, placeholder = 'Search...', extraConfig = {}) {
     if (!document.querySelector(selector)) return;
 
     new TomSelect(selector, {
@@ -266,4 +279,3 @@ function initTomSelectAjax(selector, url, placeholder = 'Cari...', extraConfig =
     });
 }
 // End Tom Select
-
