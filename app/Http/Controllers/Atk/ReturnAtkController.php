@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Atk;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ReturnController extends Controller
+class ReturnAtkController extends Controller
 {
     public function form()
     {

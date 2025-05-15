@@ -79,14 +79,13 @@ return new class extends Migration {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
             $table->string('name');                         
-            $table->text('address')->nullable();        
-            $table->string('phone')->nullable();
             $table->string('pic')->nullable();
-            $table->string('npwp')->nullable();
+            $table->string('phone')->nullable();
             $table->string('email')->nullable();
-            $table->string('bank_name')->nullable();     
-            $table->string('bank_account')->nullable();    
-            $table->string('status')->default('active');
+            $table->string('bank_name')->nullable();
+            $table->string('bank_account')->nullable();
+            $table->text('address')->nullable();        
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
 

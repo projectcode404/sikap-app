@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\Master\Employee;
-use App\Models\Atk\AtkOutRequest;
-use App\Models\Atk\AtkOutItem;
+use App\Models\Atk\RequestAtk;
+use App\Models\Atk\RequestAtkItem;
 
-class ImportRequestController extends Controller
+class ImportRequestAtkController extends Controller
 {
     public function import(Request $request)
     {

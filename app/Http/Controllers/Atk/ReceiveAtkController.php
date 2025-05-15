@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Atk;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ReceiveController extends Controller
+class ReceiveAtkController extends Controller
 {
     public function index()
     {

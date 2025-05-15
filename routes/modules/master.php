@@ -5,6 +5,7 @@ use App\Http\Controllers\Master\EmployeeController;
 use App\Http\Controllers\Master\DivisionController;
 use App\Http\Controllers\Master\PositionController;
 use App\Http\Controllers\Master\WorkUnitController;
+use App\Http\Controllers\Master\SupplierController;
 
 Route::prefix('master')->name('master.')->middleware(['auth'])->group(function () {
     Route::middleware(['role:superadmin'])->group(function () {
@@ -23,5 +24,9 @@ Route::prefix('master')->name('master.')->middleware(['auth'])->group(function (
         // Work Units
         Route::get('work-units/api', [WorkUnitController::class, 'getWorkUnits'])->name('work-units.api');
         Route::resource('work-units', WorkUnitController::class)->parameters(['work-units' => 'work_unit']);
+
+        // Suppliers
+        Route::get('suppliers/api', [SupplierController::class, 'getSuppliers'])->name('suppliers.api');
+        Route::resource('suppliers', SupplierController::class)->parameters(['suppliers' => 'supplier']);
     });
 });

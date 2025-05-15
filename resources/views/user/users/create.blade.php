@@ -9,9 +9,9 @@
 
     <div class="container-fluid pt-4">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-10">
                 <!-- Start Card -->
-                <div class="card card-primary card-outline mb-4">
+                <div class="card shadow-sm card-outline mb-4">
                     <div class="card-header">
                         <h3 class="card-title">
                             {{ isset($user) ? 'Edit User' : 'Create User' }}
@@ -51,19 +51,19 @@
 
                     <div class="card-footer">
                         <div class="d-flex justify-content-between">
-                            <a href="{{ route('user.users.index') }}" class="btn btn-secondary">Cancel</a>
+                            <a href="{{ route('user.users.index') }}" class="btn btn-outline-primary">Cancel</a>
 
                             <div class="d-flex gap-2">
                                 @if(!isset($user))
-                                <button type="submit" id="confirmCreateBtn" class="btn btn-primary d-none"></button>
+                                <button type="submit" id="confirmCreateBtn" class="btn d-none"></button>
                                 <button type="button" id="createTriggerBtn" class="btn btn-primary">
                                     <i class="fas fa-user-plus me-1"></i> Create User
                                 </button>
                                 @else
-                                    <button type="button" id="resetPasswordBtn" class="btn btn-warning" data-user-id="{{ $user->id }}">
+                                    <button type="button" id="resetPasswordBtn" class="btn btn-outline-warning" data-user-id="{{ $user->id }}">
                                         <i class="fas fa-key me-1"></i> Reset Password Default
                                     </button>
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" class="btn btn-outline-primary">
                                         <i class="fas fa-save me-1"></i> Update User
                                     </button>
                                 @endif

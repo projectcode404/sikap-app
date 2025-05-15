@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Atk\StockAtk;
 use Illuminate\Http\Request;
 
-class StockController extends Controller
+class StockAtkController extends Controller
 {
     public function getStock(Request $request)
     {

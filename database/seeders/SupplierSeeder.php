@@ -12,7 +12,6 @@ class SupplierSeeder extends Seeder
         DB::table('suppliers')->insert([
             [
                 'name' => 'PT Otani Premium Paper Industry',
-                'npwp' => '01.234.567.8-999.000',
                 'pic' => 'Budi Santoso',
                 'email' => 'budi@otani.co.id',
                 'phone' => '02129309975-79',

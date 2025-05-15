@@ -48,9 +48,9 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/master/suppliers') }}" class="nav-link {{ Request::is('master/suppliers') ? 'active' : '' }}">
+                            <a href="{{ url('/master/suppliers') }}" class="nav-link {{ Request::is('master/suppliers*') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-building-columns"></i>
-                                <p>suppliers</p>
+                                <p>Suppliers</p>
                             </a>
                         </li>
                     </ul>
@@ -71,7 +71,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/atk/po') }}" class="nav-link {{ Request::is('atk/po') ? 'active' : '' }}">
+                            <a href="{{ url('/atk/po-atk') }}" class="nav-link {{ Request::is('atk/po-atk') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-file-signature"></i>
                                 <p>PO ATK</p>
                             </a>
