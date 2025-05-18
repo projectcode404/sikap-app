@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class StockAtkSeeder extends Seeder
+class AtkItemSeeder extends Seeder
 {
     public function run(): void
     {
@@ -23,12 +23,12 @@ class StockAtkSeeder extends Seeder
         ];
 
         foreach ($items as $item) {
-            DB::table('stock_atk')->updateOrInsert(
+            DB::table('atk_items')->updateOrInsert(
                 ['name' => $item],
                 [
                     'unit' => 'pcs',
-                    'stock_qty' => rand(20, 100), // ✅ stok random antara 10–100
-                    'min_stock' => rand(5, 10),   // ✅ minimal stok juga random
+                    'current_stock' => 100,
+                    'min_stock' => 5,
                     'description' => null,
                     'updated_at' => Carbon::now(),
                     'created_at' => Carbon::now(),

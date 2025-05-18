@@ -89,82 +89,91 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('stock_atk', function (Blueprint $table) {
+        Schema::create('atk_items', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->unsignedInteger('stock_qty');
+            $table->string('name')->unique();
             $table->string('unit')->default('pcs');
+            $table->integer('current_stock')->default(0);
             $table->unsignedInteger('min_stock')->default(0);
             $table->text('description')->nullable();
             $table->timestamps();
         });
 
-        Schema::create('po_atk', function (Blueprint $table) {
+        Schema::create('atk_stocks', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('atk_item_id')->constrained('atk_items');
+            $table->enum('type', ['in', 'out', 'adjustment'])->default('in');
+            $table->integer('qty')->default(0);
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('atk_purchase_orders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('supplier_id')->constrained('suppliers');
             $table->string('po_number')->unique()->index();
             $table->date('po_date');
             $table->date('schedule_date')->nullable();
-            $table->foreignId('supplier_id')->constrained('suppliers');
             $table->text('note')->nullable();
             $table->enum('status', ['open', 'partial', 'completed', 'canceled'])->default('open');
             $table->uuid('created_by');
             $table->timestamps();
         });
 
-        Schema::create('po_atk_items', function (Blueprint $table) {
+        Schema::create('atk_purchase_order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('po_atk_id')->constrained('po_atk')->onDelete('cascade');
-            $table->foreignId('stock_atk_id')->constrained('stock_atk');
-            $table->integer('qty');
+            $table->foreignId('atk_purchase_order_id')->constrained('atk_purchase_orders')->onDelete('cascade');
+            $table->foreignId('atk_item_id')->constrained('atk_items');
+            $table->integer('qty')->default(0);
+            $table->string('unit')->default('pcs');
+            $table->integer('received_qty')->default(0);
             $table->timestamps();
         });
 
-        Schema::create('receive_atk', function (Blueprint $table) {
+        Schema::create('atk_receives', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('po_atk_id')->constrained('po_atk');
-            $table->string('receipt_number')->unique()->nullable();
+            $table->foreignId('atk_purchase_order_id')->constrained('atk_purchase_orders');
+            $table->string('receipt_number')->unique();
             $table->uuid('received_by');
             $table->date('receive_date');
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
 
-        Schema::create('receive_atk_items', function (Blueprint $table) {
+        Schema::create('atk_receive_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('po_atk_item_id')->nullable()->constrained('po_atk_items');
-            $table->foreignId('receive_atk_id')->constrained('receive_atk')->onDelete('cascade');
-            $table->foreignId('stock_atk_id')->constrained('stock_atk');
-            $table->integer('qty');
+            $table->foreignId('atk_purchase_order_item_id')->nullable()->constrained('atk_purchase_order_items');
+            $table->foreignId('atk_receive_id')->constrained('atk_receives')->onDelete('cascade');
+            $table->foreignId('atk_item_id')->constrained('atk_items');
+            $table->integer('qty')->default(0);
             $table->timestamps();
         });
 
         Schema::create('atk_out_requests', function (Blueprint $table) {
             $table->uuid('id')->primary();
-
+            
             // ID Formester, jika permintaan berasal dari import file csv formester
             $table->string('id_formester')->nullable()->unique();
 
             // Identitas peminta
             $table->string('employee_id'); // FK ke employee_id (bukan PK id)
+            $table->foreign('employee_id')->references('employee_id')->on('employees');
             $table->string('position_name'); // Biar tetap terlihat walaupun posisi berubah
             $table->string('work_unit_id')->nullable();
             $table->foreign('work_unit_id')->references('work_unit_id')->on('work_units')->onDelete('set null');
             $table->date('request_date')->nullable();
+            $table->char('period', 7)->index(); // Format: "2025-04"
         
             // Tracking siapa yang buat dan approve
             $table->uuid('created_by'); // user_id
             $table->uuid('approved_by')->nullable(); // user_id jika ada persetujuan manual
-        
-            // Periode permintaan
-            $table->string('period'); // Format: "April 2025" atau "2025-04"
+            $table->enum('status', ['outstanding', 'pending', 'realized', 'canceled'])->default('outstanding');
         
             // Tanda terima
             $table->string('receipt_file')->nullable();
             $table->timestamp('printed_at')->nullable();
             $table->timestamp('received_at')->nullable();
-        
-            // Status permintaan
-            $table->enum('status', ['outstanding', 'pending', 'realized', 'canceled'])->default('outstanding');
-        
+
             // Tambahan kolom log
             $table->text('remarks')->nullable();
             $table->string('canceled_reason')->nullable();
@@ -172,26 +181,26 @@ return new class extends Migration {
             $table->timestamp('restored_at')->nullable();
         
             $table->timestamps();
+            $table->index(['period', 'status']);
+            $table->index('employee_id');
         });
 
-        Schema::create('atk_out_items', function (Blueprint $table) {
+        Schema::create('atk_out_request_items', function (Blueprint $table) {
             $table->id();
             $table->uuid('atk_out_request_id');
             $table->foreign('atk_out_request_id')->references('id')->on('atk_out_requests')->onDelete('cascade');
-        
-            $table->foreignId('stock_atk_id')->constrained('stock_atk')->onDelete('restrict');
-        
+            $table->foreignId('atk_item_id')->constrained('atk_items')->onDelete('restrict');
             $table->integer('qty')->default(0);
-        
             $table->timestamps();
+            $table->index('atk_item_id');
         });
 
         Schema::create('atk_returns', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('stock_atk_id')->constrained('stock_atk');
+            $table->foreignId('atk_item_id')->constrained('atk_items');
             $table->string('work_unit_id')->nullable();
             $table->foreign('work_unit_id')->references('work_unit_id')->on('work_units')->onDelete('set null');
-            $table->integer('qty_returned');
+            $table->integer('qty_returned')->default(0);
             $table->date('date');
             $table->string('reason')->nullable();
             $table->uuid('uploaded_by');
@@ -201,15 +210,16 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('suppliers');
         Schema::dropIfExists('atk_returns');
-        Schema::dropIfExists('atk_out_items');
+        Schema::dropIfExists('atk_out_request_items');
         Schema::dropIfExists('atk_out_requests');
-        Schema::dropIfExists('receive_atk_items');
-        Schema::dropIfExists('receive_atk');
-        Schema::dropIfExists('po_atk_items');
-        Schema::dropIfExists('po_atk');
-        Schema::dropIfExists('stock_atk');
+        Schema::dropIfExists('atk_receive_items');
+        Schema::dropIfExists('atk_receives');
+        Schema::dropIfExists('atk_purchase_order_items');
+        Schema::dropIfExists('atk_purchase_orders');
+        Schema::dropIfExists('atk_stocks');
+        Schema::dropIfExists('atk_items');
+        Schema::dropIfExists('suppliers');
         Schema::dropIfExists('users');
         Schema::dropIfExists('employees');
         Schema::dropIfExists('work_units');

@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Atk;
 
 use App\Http\Controllers\Controller;
-use App\Models\Atk\StockAtk;
+use App\Models\Atk\Item;
 use Illuminate\Http\Request;
 
-class StockAtkController extends Controller
+class ItemController extends Controller
 {
-    public function getStock(Request $request)
+    public function getItems(Request $request)
     {
         if (!$request->ajax()) {
             return abort(404, 'Not Found');
         }
 
-        $stocks = StockAtk::select('id', 'name', 'unit', 'stock_qty', 'min_stock', 'description')
+        $items = Item::select('id', 'name', 'unit', 'current_stock', 'min_stock', 'description')
             ->orderBy('name')
             ->get()
             ->map(function ($item) {
@@ -22,16 +22,22 @@ class StockAtkController extends Controller
                     'id' => $item->id,
                     'name' => $item->name,
                     'unit' => $item->unit,
-                    'stock_qty' => $item->stock_qty,
+                    'current_stock' => $item->current_stock,
                     'min_stock' => $item->min_stock,
                     'description' => $item->description ?? '-',
                 ];
             });
 
-        return response()->json($stocks);
+        return response()->json($items);
     }
+    
     public function index()
     {
-        return view('atk.stock.index');
+        return view('atk.items.index');
+    }
+    
+    public function create()
+    {
+        return view('atk.items.create');
     }
 }

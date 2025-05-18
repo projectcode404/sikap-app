@@ -258,10 +258,31 @@ async function deleteData(deleteUrl, apiRoute, gridSelector) {
 // End AG Grid
 
 // Tom Select
-function initTomSelectAjax(selector, url, placeholder = 'Search...', extraConfig = {}) {
-    if (!document.querySelector(selector)) return;
+// function initTomSelectAjax(selector, url, placeholder = 'Search...', extraConfig = {}) {
+//     if (!document.querySelector(selector)) return;
 
-    new TomSelect(selector, {
+//     new TomSelect(selector, {
+//         valueField: 'id',
+//         labelField: 'text',
+//         searchField: 'text',
+//         placeholder: placeholder,
+//         load: function(query, callback) {
+//             if (!query.length) return callback();
+//             const urlWithQuery = `${url}?q=${encodeURIComponent(query)}`;
+        
+//             fetch(urlWithQuery)
+//                 .then(response => response.json())
+//                 .then(results => callback(results))
+//                 .catch(() => callback());
+//         },
+//         ...extraConfig
+//     });
+// }
+
+function initTomSelectAjax(element, url, placeholder = 'Search...', extraConfig = {}) {
+    if (!element) return null;
+
+    return new TomSelect(element, {
         valueField: 'id',
         labelField: 'text',
         searchField: 'text',

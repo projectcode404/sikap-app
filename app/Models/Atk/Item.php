@@ -5,16 +5,16 @@ namespace App\Models\Atk;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class StockAtk extends Model
+class Item extends Model
 {
     use HasFactory;
 
-    protected $table = 'stock_atk';
+    protected $table = 'atk_items';
 
     protected $fillable = [
         'name',
         'unit',
-        'stock_qty',
+        'current_stock',
         'min_stock',
         'description',
     ];

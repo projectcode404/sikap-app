@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
             WorkUnitSeeder::class,
             EmployeeSeeder::class,
             RolePermissionSeeder::class,
-            StockAtkSeeder::class,
+            AtkItemSeeder::class,
             SupplierSeeder::class,
         ]);
     }

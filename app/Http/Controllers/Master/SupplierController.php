@@ -10,10 +10,34 @@ class SupplierController extends Controller
 {
     public function getSuppliers(Request $request)
     {
-        if (!$request->ajax()) {
+        if (!$request->ajax() && !$request->has('select') && !$request->has('q')) {
             return abort(404, 'Not Found');
         }
 
+        // Tom Select
+        if ($request->has('select') || $request->has('q')) {
+            $search = $request->q;
+
+            $suppliers = Supplier::query()
+                ->where('status', 'active')
+                ->where(function ($q) use ($search) {
+                    $q->where('id', 'ILIKE', "%$search%")
+                    ->orWhere('name', 'ILIKE', "%$search%");
+                })
+                ->limit(20)
+                ->select('id', 'name')
+                ->get()
+                ->map(function ($s) {
+                    return [
+                        'id' => $s->id,
+                        'text' => $s->name,
+                    ];
+                });
+
+            return response()->json($suppliers);
+        }
+
+        // AG Grid
         $suppliers = Supplier::all();
         return response()->json($suppliers);
     }

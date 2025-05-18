@@ -27,7 +27,7 @@
                             <input type="hidden" id="preview_password" name="preview_password" value="Iapsby{{ old('employee_id') ?? '' }}">
                         </div>
 
-                        <div class="mb-3">
+                        <div class="form-group mb-3">
                             <label for="roles">Roles</label>
                             <select name="roles[]" id="roles" class="form-select" multiple required>
                                 @foreach($roles as $role)

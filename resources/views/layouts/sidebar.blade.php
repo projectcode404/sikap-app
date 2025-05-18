@@ -65,33 +65,33 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ url('/atk/stock') }}" class="nav-link {{ Request::is('atk/stock') ? 'active' : '' }}">
+                            <a href="{{ url('/atk/items') }}" class="nav-link {{ Request::is('atk/items*') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-warehouse"></i>
-                                <p>Stock</p>
+                                <p>Items</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/atk/po-atk') }}" class="nav-link {{ Request::is('atk/po-atk') ? 'active' : '' }}">
+                            <a href="{{ url('/atk/purchase-orders') }}" class="nav-link {{ Request::is('atk/purchase-orders*') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-file-signature"></i>
-                                <p>PO ATK</p>
+                                <p>Purchase Orders</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/atk/receive') }}" class="nav-link {{ Request::is('atk/receive') ? 'active' : '' }}">
+                            <a href="{{ url('/atk/receives') }}" class="nav-link {{ Request::is('atk/receives*') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-truck-ramp-box"></i>
-                                <p>Receive ATK</p>
+                                <p>Receives</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/atk/request') }}" class="nav-link {{ Request::is('atk/request') ? 'active' : '' }}">
+                            <a href="{{ url('/atk/out-request') }}" class="nav-link {{ Request::is('atk/out-requests*') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-cart-plus"></i>
-                                <p>Request ATK</p>
+                                <p>Out Requests</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/atk/request') }}" class="nav-link {{ Request::is('atk/request') ? 'active' : '' }}">
+                            <a href="{{ url('/atk/returns') }}" class="nav-link {{ Request::is('atk/returns*') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-box-open"></i>
-                                <p>Return ATK</p>
+                                <p>Returns</p>
                             </a>
                         </li>
                     </ul>
