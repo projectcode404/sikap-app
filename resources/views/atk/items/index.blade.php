@@ -31,7 +31,20 @@
                     { headerName: "Min Stock", field: "min_stock", minWidth: 150, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".atk-items-grid", itemsColumn, "{{ route('atk.items.api') }}");
+            initializeAGGrid(".atk-items-grid", itemsColumn, "{{ route('atk.items.api') }}", [
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-warning'
+                },
+                { 
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-danger'
+                }
+            ]);
         });
     </script>
 @endsection

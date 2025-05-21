@@ -14,12 +14,12 @@ class Employee extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'employee_id';
+    protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'employee_id',
+        'id',
         'full_name',
         'address',
         'birth_place',
@@ -43,13 +43,13 @@ class Employee extends Model
         'in_date',
         'retirement_date',
         'out_date',
-        'notes',
+        'note',
         'status',
         'photo',
     ];
 
     public function user() {
-        return $this->hasOne(User::class, 'employee_id', 'employee_id');
+        return $this->hasOne(User::class, 'employee_id', 'id');
     }
 
     public function division() {

@@ -31,7 +31,20 @@
                     { headerName: "Status", field: "status", minWidth: 100, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".suppliers-grid", suppliersColumn, "{{ route('master.suppliers.api') }}");
+            initializeAGGrid(".suppliers-grid", suppliersColumn, "{{ route('master.suppliers.api') }}", [
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-warning'
+                },
+                { 
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-danger'
+                }
+            ]);
         });
     </script>
 @endsection

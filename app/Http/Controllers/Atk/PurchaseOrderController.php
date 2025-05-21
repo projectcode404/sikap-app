@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Atk;
 use App\Http\Controllers\Controller;
 use App\Models\Atk\PurchaseOrder;
 use App\Models\Atk\PurchaseOrderItem;
+use App\Models\Atk\Receive;
+use App\Models\Atk\ReceiveItem;
+use App\Models\Atk\Stock;
 use App\Models\Atk\Item;
 use App\Models\Master\Supplier;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +23,7 @@ class PurchaseOrderController extends Controller
 
         $purchase_orders = PurchaseOrder::with([
             'supplier:id,name',
-            'user.employee:employee_id,full_name'
+            'user.employee:id,full_name'
         ])->get();
 
         // Optionally format the output
@@ -71,6 +74,29 @@ class PurchaseOrderController extends Controller
         return view('atk.purchase-orders.create');
     }
 
+    public function show(PurchaseOrder $purchaseOrder)
+    {
+        // Eager load relationships
+        $purchaseOrder->load(['items', 'supplier', 'receives']);
+
+        // Get active suppliers for dropdown
+        $suppliers = Supplier::where('status', 'active');
+        
+        // Get ATK items with unit information
+        $atkItems = Item::select('id', 'name', 'unit')->get();
+
+        $receives = Receive::where('atk_purchase_order_id', $purchaseOrder->id)
+            ->with(['receiveItems'])
+            ->first();
+        
+        return view('atk.purchase-orders.show', compact(
+            'purchaseOrder',
+            'suppliers',
+            'atkItems',
+            'receives'
+        ));
+    }
+
     public function store(Request $request)
     {
          $validated = $request->validate([
@@ -115,7 +141,7 @@ class PurchaseOrderController extends Controller
 
             DB::commit();
 
-            return redirect()->route('atk.purchase-orders.index', $po)->with('success', 'Purchase Order created successfully!');
+            return redirect()->route('atk.purchase-orders.index')->with('success', 'Purchase Order created successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -217,10 +243,10 @@ class PurchaseOrderController extends Controller
                     throw new \Exception('Can\'t delete Purchase Order with status ' . $purchaseOrder->status);
                 }
 
-                // // Cek relasi penerimaan barang
-                // if ($purchaseOrder->receives()->exists()) {
-                //     throw new \Exception('Can\'t delete Purchase Order with existing goods receipt');
-                // }
+                // Cek relasi penerimaan barang
+                if ($purchaseOrder->receives()->exists()) {
+                    throw new \Exception('Can\'t delete Purchase Order with existing goods receipt');
+                }
 
                 // Hapus semua item PO
                 $purchaseOrder->items()->delete();

@@ -31,7 +31,20 @@
                 { headerName: "Type", field: "type", sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".work-units-grid", workUnitsColumn, "{{ route('master.work-units.api') }}");
+            initializeAGGrid(".work-units-grid", workUnitsColumn, "{{ route('master.work-units.api') }}", [
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-warning'
+                },
+                { 
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-danger'
+                }
+            ]);
         });
     </script>
 @endsection

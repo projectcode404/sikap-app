@@ -2,6 +2,9 @@
 
 namespace App\Models\Atk;
 
+use App\Models\Atk\Stock;
+use App\Models\Atk\ReceiveItem;
+use App\Models\Atk\StockAdjustment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -18,4 +21,19 @@ class Item extends Model
         'min_stock',
         'description',
     ];
+
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class, 'atk_item_id');
+    }
+
+    public function receiveItems()
+    {
+        return $this->hasMany(ReceiveItem::class, 'atk_item_id');
+    }
+
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class, 'atk_item_id');
+    }
 }

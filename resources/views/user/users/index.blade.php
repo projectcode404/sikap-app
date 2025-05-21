@@ -30,7 +30,20 @@
                 { headerName: "Status", field: "status", minWidth: 100, maxWidth: 120, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".users-grid", usersColumn, "{{ route('user.users.api') }}");
+            initializeAGGrid(".users-grid", usersColumn, "{{ route('user.users.api') }}", [
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-warning'
+                },
+                { 
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-danger'
+                }
+            ]);
         });
     </script>
 @endsection

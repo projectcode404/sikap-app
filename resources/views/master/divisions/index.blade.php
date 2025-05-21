@@ -30,7 +30,20 @@
                     { headerName: "Division", field: "name", minWidth: 250, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".divisions-grid", divisionsColumn, "{{ route('master.divisions.api') }}");
+            initializeAGGrid(".divisions-grid", divisionsColumn, "{{ route('master.divisions.api') }}", [
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-warning'
+                },
+                { 
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-danger'
+                }
+            ]);
         });
     </script>
 @endsection

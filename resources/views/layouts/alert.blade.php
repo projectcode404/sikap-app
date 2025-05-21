@@ -94,3 +94,13 @@ function confirmAction(message = 'Are you sure?', callback) {
 @if(session('info'))
 <script> showInfoToast(@json(session('info'))); </script>
 @endif
+
+@if ($errors->any())
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Oops!',
+        text: '{{ $errors->first() }}',
+    });
+</script>
+@endif

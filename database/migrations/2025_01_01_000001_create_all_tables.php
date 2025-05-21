@@ -35,7 +35,7 @@ return new class extends Migration {
         });
 
         Schema::create('employees', function (Blueprint $table) {
-            $table->string('employee_id')->primary();
+            $table->string('id')->primary();
             $table->string('full_name');
             $table->text('address');
             $table->string('birth_place');
@@ -62,7 +62,7 @@ return new class extends Migration {
             $table->date('retirement_date')->nullable();
             $table->date('out_date')->nullable();
             $table->enum('status', ['active','inactive'])->default('active');
-            $table->text('notes')->nullable();
+            $table->text('note')->nullable();
             $table->string('photo')->nullable();
             $table->timestamps();
         });
@@ -70,7 +70,7 @@ return new class extends Migration {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('employee_id');
-            $table->foreign('employee_id')->references('employee_id')->on('employees');
+            $table->foreign('employee_id')->references('id')->on('employees');
             $table->string('password');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
@@ -104,7 +104,7 @@ return new class extends Migration {
             $table->foreignId('atk_item_id')->constrained('atk_items');
             $table->enum('type', ['in', 'out', 'adjustment'])->default('in');
             $table->integer('qty')->default(0);
-            $table->text('notes')->nullable();
+            $table->text('note')->nullable();
             $table->timestamps();
         });
 
@@ -115,7 +115,9 @@ return new class extends Migration {
             $table->date('po_date');
             $table->date('schedule_date')->nullable();
             $table->text('note')->nullable();
-            $table->enum('status', ['open', 'partial', 'completed', 'canceled'])->default('open');
+            $table->enum('status', ['open', 'partial', 'received', 'completed', 'canceled'])->default('open');
+            $table->string('po_file')->nullable();
+            $table->string('receipt_number')->nullable();
             $table->uuid('created_by');
             $table->timestamps();
         });
@@ -133,10 +135,10 @@ return new class extends Migration {
         Schema::create('atk_receives', function (Blueprint $table) {
             $table->id();
             $table->foreignId('atk_purchase_order_id')->constrained('atk_purchase_orders');
-            $table->string('receipt_number')->unique();
             $table->uuid('received_by');
             $table->date('receive_date');
-            $table->text('notes')->nullable();
+            $table->text('note')->nullable();
+            $table->string('receipt_file')->nullable();
             $table->timestamps();
         });
 
@@ -157,7 +159,7 @@ return new class extends Migration {
 
             // Identitas peminta
             $table->string('employee_id'); // FK ke employee_id (bukan PK id)
-            $table->foreign('employee_id')->references('employee_id')->on('employees');
+            $table->foreign('employee_id')->references('id')->on('employees');
             $table->string('position_name'); // Biar tetap terlihat walaupun posisi berubah
             $table->string('work_unit_id')->nullable();
             $table->foreign('work_unit_id')->references('work_unit_id')->on('work_units')->onDelete('set null');
@@ -206,10 +208,22 @@ return new class extends Migration {
             $table->uuid('uploaded_by');
             $table->timestamps();
         });
+
+        Schema::create('atk_stock_adjustments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('atk_item_id')->constrained('atk_items');
+            $table->integer('adjustment_qty'); // bisa negatif
+            $table->enum('reason_type', ['correction', 'loss', 'expired', 'others'])->default('correction');
+            $table->text('note')->nullable();
+            $table->date('date');
+            $table->uuid('adjusted_by');
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('atk_stock_adjustments');
         Schema::dropIfExists('atk_returns');
         Schema::dropIfExists('atk_out_request_items');
         Schema::dropIfExists('atk_out_requests');

@@ -30,7 +30,20 @@
                     { headerName: "position", field: "name", minWidth: 250, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".positions-grid", positionsColumn, "{{ route('master.positions.api') }}");
+            initializeAGGrid(".positions-grid", positionsColumn, "{{ route('master.positions.api') }}",[
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-warning'
+                },
+                { 
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-danger'
+                }
+            ]);
         });
     </script>
 @endsection

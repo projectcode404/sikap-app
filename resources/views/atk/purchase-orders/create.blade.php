@@ -25,7 +25,7 @@
                     <div class="card-body">
                         <div class="row g-2">
                             <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">
+                                <label for="supplier_id" class="form-label">
                                     <strong>Supplier Name <span class="text-danger">*</span></strong>
                                 </label>
                                 <select id="supplier_id" name="supplier_id" class="form-control @error('supplier_id') is-invalid @enderror">

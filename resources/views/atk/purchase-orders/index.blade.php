@@ -14,6 +14,10 @@
                 <i class="fa fa-plus"></i> Add PO ATK
         </a>
     </div>
+    <!-- <span class="badge bg-secondary">Open</span>[Receive] [Edit] [Delete]
+    <span class="badge bg-warning text-dark">Partial</span>[Receive] [View]
+    <span class="badge bg-info text-dark">Received</span>[View] [Mark Completed]
+    <span class="badge bg-success">Completed</span>[View] -->
     <div id="sikapGrid" class="ag-theme-quartz purchase-order-grid" style="height: 500px; width: 100%;"></div>
 </div>
 @endsection
@@ -32,7 +36,49 @@
                     { headerName: "Created By", field: "created_by", minWidth: 250, sortable: true, filter: true },
             ];
 
-            initializeAGGrid(".purchase-order-grid", purchaseOrders, "{{ route('atk.purchase-orders.api') }}");
+            // initializeAGGrid(".purchase-order-grid", purchaseOrders, "{{ route('atk.purchase-orders.api') }}");
+            initializeAGGrid('.purchase-order-grid', purchaseOrders, "{{ route('atk.purchase-orders.api') }}", [
+                {
+                    type: 'view',
+                    title: 'View',
+                    icon: 'fa-eye',
+                    class: 'btn-outline-primary',
+                    handler: ({ id }) => {
+                        window.location.href = `/atk/purchase-orders/${id}`;
+                    }
+                },
+                {
+                    type: 'gr',
+                    title: 'Good Receipt',
+                    icon: 'fa-thumbs-up',
+                    class: 'btn-outline-success',
+                    visible: row => row.status == 'received'
+                },
+                {
+                    type: 'receive',
+                    title: 'Receive',
+                    icon: 'fa-inbox',
+                    class: 'btn-outline-success',
+                    visible: row => !['received','completed'].includes(row.status),
+                    handler: ({ id }) => {
+                        window.location.href = `/atk/purchase-orders/${id}/receive`;
+                    }
+                },
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-outline-warning',
+                    visible: row => row.status == 'open'
+                },
+                {
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-outline-danger',
+                    visible: row => row.status == 'open'
+                }
+            ]);
         });
     </script>
 @endsection

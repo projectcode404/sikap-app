@@ -3,6 +3,7 @@
 namespace App\Models\Atk;
 
 use App\Models\Atk\PurchaseOrderItem;
+use App\Models\Atk\Item;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -22,5 +23,10 @@ class PurchaseOrderItem extends Model
     public function purchaseOrder()
     {
         return $this->belongsTo(PurchaseOrder::class, 'atk_purchase_order_id');
+    }
+
+    public function Item()
+    {
+        return $this->belongsTo(Item::class);
     }
 }

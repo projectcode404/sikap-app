@@ -84,7 +84,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const userId = resetPasswordBtn.dataset.userId;;
         const employeeSelect = document.querySelector('#employee_id');
-        const employeeOption = new Option("{{ $user->employee->employee_id }} - {{ $user->employee->full_name }}", "{{ $user->employee->employee_id }}", true, true);
+        const employeeOption = new Option("{{ $user->employee->id }} - {{ $user->employee->full_name }}", "{{ $user->employee->id }}", true, true);
         employeeSelect.append(employeeOption);
 
         // SweetAlert untuk Reset Password

@@ -20,7 +20,7 @@ class UserController extends Controller
         }
 
         $users = User::select('id', 'employee_id', 'status')
-                ->with(['roles:id,name'],['employee:id,employee_id,full_name'])
+                ->with(['roles:id,name','employee:id,full_name'])
                 ->get()
                 ->map(function ($user) {
                     return [
@@ -44,19 +44,19 @@ class UserController extends Controller
         $search = $request->q;
 
         $employees = Employee::where('status', 'active')
-            ->whereNotIn('employee_id', function ($query) {
+            ->whereNotIn('id', function ($query) {
                 $query->select('employee_id')->from('users')->whereNotNull('employee_id');
             })
             ->when($search, function ($q) use ($search) {
-                $q->where('employee_id', 'ILIKE', "%$search%")
+                $q->where('id', 'ILIKE', "%$search%")
                 ->orWhere('full_name', 'ILIKE', "%$search%");
             })
             ->limit(20)
             ->get()
             ->map(function ($e) {
                 return [
-                    'id' => $e->employee_id,
-                    'text' => "{$e->employee_id} - {$e->full_name}",
+                    'id' => $e->id,
+                    'text' => "{$e->id} - {$e->full_name}",
                 ];
             });
 
@@ -83,7 +83,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|exists:employees,employee_id',
+            'employee_id' => 'required|exists:employees,id',
             'roles' => 'required|array',
             'roles.*' => 'exists:roles,name',
         ]);
@@ -95,14 +95,14 @@ class UserController extends Controller
             ]);
         }
 
-        $employee = Employee::where('employee_id', $request->employee_id)->firstOrFail();
+        $employee = Employee::where('id', $request->employee_id)->firstOrFail();
 
         // Default password
-        $password = 'Iapsby' . $employee->employee_id;
+        $password = 'Iapsby' . $employee->id;
 
         $user = User::create([
             'id' => Str::uuid(),
-            'employee_id' => $employee->employee_id,
+            'employee_id' => $employee->id,
             'password' => Hash::make($password),
             'status' => 'active',
         ]);

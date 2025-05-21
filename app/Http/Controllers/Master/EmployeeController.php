@@ -26,16 +26,16 @@ class EmployeeController extends Controller
 
             $employees = Employee::query()
                 ->where(function ($q) use ($search) {
-                    $q->where('employee_id', 'ILIKE', "%$search%")
+                    $q->where('id', 'ILIKE', "%$search%")
                     ->orWhere('full_name', 'ILIKE', "%$search%");
                 })
                 ->limit(20)
-                ->select('employee_id', 'full_name')
+                ->select('id', 'full_name')
                 ->get()
                 ->map(function ($e) {
                     return [
-                        'id' => $e->employee_id,
-                        'text' => $e->employee_id . ' - ' . $e->full_name,
+                        'id' => $e->id,
+                        'text' => $e->id . ' - ' . $e->full_name,
                     ];
                 });
 
@@ -43,7 +43,7 @@ class EmployeeController extends Controller
         }
 
         // AG Grid
-        $employees = Employee::select('employee_id', 'full_name', 'gender', 'phone', 'level', 'position_id', 'division_id', 'employment_type', 'vendor', 'status')
+        $employees = Employee::select('id', 'full_name', 'gender', 'phone', 'level', 'position_id', 'division_id', 'employment_type', 'vendor', 'status')
                 ->with([
                     'division:id,name',
                     'position:id,name',
@@ -51,7 +51,7 @@ class EmployeeController extends Controller
                 ->get()
                 ->map(function ($employee) {
                     return [
-                        'employee_id' => $employee->employee_id,
+                        'id' => $employee->id,
                         'full_name' => $employee->full_name,
                         'gender' => $employee->gender,
                         'phone' => $employee->phone,
@@ -83,7 +83,7 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|unique:employees,employee_id',
+            'id' => 'required|unique:employees,id',
             'full_name' => 'required|string|max:150',
             'address' => 'required|string|max:255',
             'birth_place' => 'nullable|string|max:100',
@@ -106,7 +106,7 @@ class EmployeeController extends Controller
         ]);
 
         $employee = Employee::create([
-            'employee_id' => $request->employee_id,
+            'id' => $request->id,
             'full_name' => $request->full_name,
             'address' => $request->address,
             'birth_place' => $request->birth_place,
@@ -139,7 +139,7 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee)
     {
         $request->validate([
-            'employee_id' => 'required|unique:employees,employee_id,' . $employee->id,
+            'id' => 'required|unique:employees,id,' . $employee->id,
             'full_name' => 'required|string|max:255',
             'birth_date' => 'nullable|date',
             'gender' => 'required|in:Male,Female',
@@ -152,7 +152,7 @@ class EmployeeController extends Controller
         ]);
 
         $employee->update([
-            'employee_id' => $request->employee_id,
+            'id' => $request->id,
             'full_name' => $request->full_name,
             'address' => $request->address,
             'birth_place' => $request->birth_place,

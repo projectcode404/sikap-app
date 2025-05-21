@@ -26,7 +26,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const employeesColumn = [
-                    { headerName: "Employee ID", field: "employee_id", minWidth: 150, maxWidth: 150, sortable: true, filter: true },
+                    { headerName: "Employee ID", field: "id", minWidth: 150, maxWidth: 150, sortable: true, filter: true },
                     { headerName: "Full Name", field: "full_name", minWidth: 250, sortable: true, filter: true },
                     { headerName: "Gender", field: "gender", minWidth: 150, maxWidth: 150, sortable: true, filter: true },
                     { headerName: "Phone", field: "phone", minWidth: 150, sortable: true, filter: true },
@@ -36,7 +36,20 @@
                     { headerName: "Status", field: "status", minWidth: 100, maxWidth: 120, sortable: true, filter: true }
             ];
 
-            initializeAGGrid(".employees-grid", employeesColumn, "{{ route('master.employees.api') }}");
+            initializeAGGrid(".employees-grid", employeesColumn, "{{ route('master.employees.api') }}",[
+                { 
+                    type: 'edit', 
+                    title: 'Edit', 
+                    icon: 'fa-edit', 
+                    class: 'btn-warning'
+                },
+                { 
+                    type: 'delete', 
+                    title: 'Delete', 
+                    icon: 'fa-trash', 
+                    class: 'btn-danger'
+                }
+            ]);
         });
     </script>
 @endsection

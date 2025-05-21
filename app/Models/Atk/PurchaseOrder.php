@@ -3,6 +3,7 @@
 namespace App\Models\Atk;
 
 use App\Models\Atk\PurchaseOrderItem;
+use App\Models\Atk\Receive;
 use App\Models\Master\Supplier;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,8 @@ class PurchaseOrder extends Model
         'supplier_id',
         'note',
         'status',
+        'po_file',
+        'receipt_number',
         'created_by',
     ];
 
@@ -37,5 +40,10 @@ class PurchaseOrder extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function receives()
+    {
+        return $this->hasMany(Receive::class, 'atk_purchase_order_id');
     }
 }
