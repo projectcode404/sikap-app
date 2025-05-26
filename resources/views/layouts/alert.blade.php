@@ -1,5 +1,4 @@
-{{-- layouts/alert.blade.php --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+<!-- SweetAlert2 -->
 <script>
 // 🔹 Theme detection for dark mode
 function getSwalTheme() {
@@ -84,15 +83,27 @@ function confirmAction(message = 'Are you sure?', callback) {
 </script>
 
 @if(session('success'))
-<script> showSuccessToast(@json(session('success'))); </script>
+<script> 
+    document.addEventListener('DOMContentLoaded', function () {
+        showSuccessToast(@json(session('success')));
+    });
+</script>
 @endif
 
 @if(session('error'))
-<script> showErrorToast(@json(session('error'))); </script>
+<script> 
+    document.addEventListener('DOMContentLoaded', function () {
+        showSuccessToast(@json(session('error')));
+    });
+</script>
 @endif
 
 @if(session('info'))
-<script> showInfoToast(@json(session('info'))); </script>
+<script> 
+    document.addEventListener('DOMContentLoaded', function () {
+        showSuccessToast(@json(session('info')));
+    });
+</script>
 @endif
 
 @if ($errors->any())

@@ -30,6 +30,28 @@ class ItemController extends Controller
 
         return response()->json($items);
     }
+
+    public function getAtkItems(Request $request)
+    {
+        if (!$request->ajax() && !$request->has('select') && !$request->has('q')) {
+            return abort(404, 'Not Found');
+        }
+
+        $search = $request->q;
+
+        $atkItems = Item::select('id', 'name', 'unit')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'text' => $item->name,
+                    'unit' => $item->unit,
+                ];
+            });
+
+        return response()->json($atkItems);
+    }
     
     public function index()
     {

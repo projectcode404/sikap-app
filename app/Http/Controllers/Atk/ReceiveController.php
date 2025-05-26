@@ -16,40 +16,66 @@ use Illuminate\Validation\ValidationException;
 
 class ReceiveController extends Controller
 {
+    public function getReceives(Request $request)
+    {
+        if (!$request->ajax()) {
+            return abort(404, 'Not Found');
+        }
+
+        $receives = Receive::with(['purchaseOrder', 'receiver.employee', 'items'])->get();
+
+        $data = $receives->map(function ($receive) {
+            return [
+                'id' => $receive->id,
+                'po_number' => $receive->purchaseOrder->po_number ?? '-',
+                'receive_date' => \Carbon\Carbon::parse($receive->receive_date)?->format('Y-m-d'),
+                'receiver_name' => optional($receive->receiver?->employee)->full_name ?? '-',
+                'qty_total' => $receive->items->sum('qty'),
+                'note' => $receive->note ?? '-',
+                'receipt_file' => $receive->receipt_file
+                    ? asset('storage/' . $receive->receipt_file)
+                    : null,
+            ];
+        });
+
+        return response()->json($data);
+    }
+
     public function index()
     {
-        // Tampilkan daftar penerimaan ATK
+        return view('atk.receives.index');
+    }
+
+    public function show(Receive $receive)
+    {
+        $receive->load([
+            'items.item',
+            'receiver.employee',
+            'purchaseOrder'
+        ]);
+
+        return view('atk.receives.show', compact('receive'));
     }
 
     public function create(PurchaseOrder $purchaseOrder)
     {
-        // Eager load relationships
         $purchaseOrder->load(['items', 'supplier']);
-        
-        // Get active suppliers for dropdown
-        $suppliers = Supplier::where('status', 'active')
-            ->pluck('name', 'id');
-        
-        // Get ATK items with unit information
+
+        $suppliers = Supplier::active()->pluck('name', 'id');
         $atkItems = Item::select('id', 'name', 'unit')->get();
-        
-        return view('atk.receives.create', compact(
-            'purchaseOrder',
-            'suppliers',
-            'atkItems'
-        ));
+
+        return view('atk.receives.create', compact('purchaseOrder', 'suppliers', 'atkItems'));
     }
 
     public function store(Request $request, PurchaseOrder $purchaseOrder)
     {
-        $validated = $this->validateReceiveRequest($request, $purchaseOrder);
+        $validated = $this->validateReceiveRequest($request);
 
         DB::beginTransaction();
 
         try {
             $purchaseOrder->load('items');
             [$poItems, $atkItems] = $this->getPOAndAtkItems($validated['items']);
-
             $receiptPath = $this->storeReceiptFile($request);
 
             $receive = Receive::create([
@@ -73,9 +99,7 @@ class ReceiveController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('atk.purchase-orders.index')
-                ->with('success', 'Items successfully received.');
+            return redirect()->route('atk.purchase-orders.index')->with('success', 'Items successfully received.');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Receive failed', ['error' => $e->getMessage()]);
@@ -83,9 +107,8 @@ class ReceiveController extends Controller
         }
     }
 
-    private function validateReceiveRequest(Request $request, PurchaseOrder $purchaseOrder): array
+    private function validateReceiveRequest(Request $request): array
     {
-        // Step 1: Validasi struktur data
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.atk_purchase_order_item_id' => 'required|exists:atk_purchase_order_items,id',
@@ -95,16 +118,13 @@ class ReceiveController extends Controller
             'receipt_file' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        // Step 2: Ambil data PO Items untuk validasi sisa qty
         $poItemIds = collect($validated['items'])->pluck('atk_purchase_order_item_id');
         $poItems = PurchaseOrderItem::whereIn('id', $poItemIds)->get()->keyBy('id');
 
-        // Step 3: Normalisasi qty dan validasi tidak melebihi remaining
         $hasQty = false;
 
         $validated['items'] = collect($validated['items'])->map(function ($item) use (&$hasQty, $poItems) {
             $poItem = $poItems[$item['atk_purchase_order_item_id']] ?? null;
-
             $qty = isset($item['qty']) && is_numeric($item['qty']) ? (int) $item['qty'] : 0;
             $remainingQty = $poItem ? max(0, $poItem->qty - $poItem->received_qty) : 0;
 

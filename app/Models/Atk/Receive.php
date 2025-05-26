@@ -2,9 +2,10 @@
 
 namespace App\Models\Atk;
 
-use App\Models\Master\User;
+use App\Models\User\User;
 use App\Models\Atk\PurchaseOrder;
 use App\Models\Atk\ReceiveItem;
+use App\Models\Atk\Item;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -38,5 +39,12 @@ class Receive extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'received_by');
+    }
+
+    // Relasi ke Item
+    public function items()
+    {
+        return $this->hasMany(ReceiveItem::class, 'atk_receive_id')
+            ->with('item');
     }
 }

@@ -13,20 +13,20 @@
                     <span class="theme-icon-active">
                         <i class="my-1"></i>
                     </span>
-                    <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
+                    <span class="d-lg-none ms-2" id="bd-theme-text">{{ __('messages.theme') }}</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text" style="--bs-dropdown-min-width: 8rem;">
                     <li>
                         <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="light" aria-pressed="false">
                             <i class="bi bi-sun-fill me-2"></i>
-                            Light
+                            {{ __('messages.light') }}
                             <i class="bi bi-check-lg ms-auto d-none"></i>
                         </button>
                     </li>
                     <li>
                         <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
                             <i class="bi bi-moon-fill me-2"></i>
-                            Dark
+                            {{ __('messages.dark') }}
                             <i class="bi bi-check-lg ms-auto d-none"></i>
                         </button>
                     </li>
@@ -40,6 +40,37 @@
                 </a>
             </li>
             <!--end::Fullscreen Toggle-->
+            <!--begin::Language Dropdown-->
+            <li class="nav-item dropdown">
+                <button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center"
+                        id="lang-switcher" type="button" aria-expanded="false" data-bs-toggle="dropdown"
+                        data-bs-display="static">
+                    <span class="theme-icon-active">
+                        <i class="fas fa-globe me-1"></i>
+                    </span>
+                    <span class="d-lg-none ms-2">{{ __('messages.language') }}</span>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="lang-switcher" style="--bs-dropdown-min-width: 8rem;">
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center {{ app()->getLocale() === 'id' ? 'active' : '' }}"
+                        href="{{ route('set-locale', 'id') }}"> ID
+                            @if(app()->getLocale() === 'id')
+                                <i class="fas fa-check ms-auto"></i>
+                            @endif
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center {{ app()->getLocale() === 'en' ? 'active' : '' }}"
+                        href="{{ route('set-locale', 'en') }}"> EN
+                            @if(app()->getLocale() === 'en')
+                                <i class="fas fa-check ms-auto"></i>
+                            @endif
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!--end::Language Dropdown-->
             <!--begin::User Menu Dropdown-->
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -70,7 +101,7 @@
                         @csrf
 
                         <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="btn btn-default btn-flat float-end">
-                            Sign out
+                            {{ __('messages.sign_out') }}
                         </a>
                     </form>
                 </li>

@@ -1,0 +1,6 @@
+static:
+  - public
+  - public/storage
+  
+log:
+  level: debug

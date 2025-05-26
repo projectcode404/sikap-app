@@ -28,12 +28,14 @@
                                 <label for="supplier_id" class="form-label">
                                     <strong>Supplier Name <span class="text-danger">*</span></strong>
                                 </label>
-                                <select id="supplier_id" name="supplier_id" class="form-control @error('supplier_id') is-invalid @enderror">
-                                    @if(isset($purchaseOrder))
-                                        <option value="{{ $purchaseOrder->supplier_id }}" selected>
-                                            {{ $purchaseOrder->supplier->name }}
+                                <select id="supplier_id" name="supplier_id" class="form-control tom-select @error('supplier_id') is-invalid @enderror" required>
+                                    <option value="">-- Pilih Supplier --</option>
+                                    @foreach ($suppliers as $id => $name)
+                                        <option value="{{ $id }}"
+                                            @if (old('supplier_id', $purchaseOrder->supplier_id ?? '') == $id) selected @endif>
+                                            {{ $name }}
                                         </option>
-                                    @endif
+                                    @endforeach
                                 </select>
                                 @error('supplier_id')
                                     <span class="invalid-feedback">{{ $message }}</span>
@@ -114,7 +116,6 @@
                                     </button>
                                 </div>
                             </div>
-                            
                         </div>
                     </div>
                     <div class="card-footer">

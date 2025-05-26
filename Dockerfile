@@ -58,3 +58,5 @@ ENV FRANKENPHP_ADDRESS=0.0.0.0:8080
 
 # Start Laravel and FrankenPHP
 CMD ["sh", "-c", "php artisan config:clear && php artisan cache:clear && php artisan migrate --force && frankenphp run"]
+
+COPY frankenphp.yaml /app/frankenphp.yaml

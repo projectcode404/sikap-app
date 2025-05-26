@@ -32,8 +32,8 @@ class Item extends Model
         return $this->hasMany(ReceiveItem::class, 'atk_item_id');
     }
 
-    public function stockAdjustments()
+    public function adjustments()
     {
-        return $this->hasMany(StockAdjustment::class, 'atk_item_id');
+        return $this->hasMany(Adjustment::class, 'atk_item_id');
     }
 }

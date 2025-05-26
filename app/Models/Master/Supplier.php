@@ -19,4 +19,9 @@ class Supplier extends Model
         'address',
         'status',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 }

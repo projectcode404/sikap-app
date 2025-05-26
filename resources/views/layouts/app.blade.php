@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/sikap.css') }}">
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/f9d087d068.js" crossorigin="anonymous"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
 
     @yield('styles')
 </head>
