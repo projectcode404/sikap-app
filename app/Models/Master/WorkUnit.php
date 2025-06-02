@@ -9,12 +9,12 @@ class WorkUnit extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'work_unit_id';
+    protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'work_unit_id',
+        'id',
         'name',
         'type'
     ];

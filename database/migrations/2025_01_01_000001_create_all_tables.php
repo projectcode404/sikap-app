@@ -26,7 +26,7 @@ return new class extends Migration {
         });
 
         Schema::create('work_units', function (Blueprint $table) {
-            $table->string('work_unit_id')->primary();
+            $table->string('id')->primary();
             $table->foreignId('area_id')->nullable()->constrained()->onDelete('set null');
             $table->string('name');
             $table->string('location')->nullable(); 
@@ -53,7 +53,7 @@ return new class extends Migration {
             $table->foreignId('position_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('division_id')->nullable()->constrained()->onDelete('set null');
             $table->string('work_unit_id')->nullable()->index();
-            $table->foreign('work_unit_id')->references('work_unit_id')->on('work_units')->onDelete('set null');
+            $table->foreign('work_unit_id')->references('id')->on('work_units')->onDelete('set null');
             $table->enum('level', ['operative','staff','supervisor','manager'])->nullable();
             $table->enum('grade', ['a1','a2','a3','b1','b2','b3','c1','c2','c3','d1','d2','d3','e1','e2'])->nullable();
             $table->enum('employment_type', ['permanent','contract'])->default('permanent');
@@ -103,7 +103,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('atk_item_id')->constrained('atk_items');
             $table->enum('type', ['in', 'out', 'adjustment'])->default('in');
-            $table->integer('qty')->default(0);
+            $table->integer('qty');
+            $table->integer('begining_stock');
+            $table->integer('ending_stock');
             $table->text('note')->nullable();
             $table->timestamps();
         });
@@ -117,7 +119,7 @@ return new class extends Migration {
             $table->text('note')->nullable();
             $table->enum('status', ['open', 'partial', 'received', 'completed', 'canceled'])->default('open');
             $table->string('po_file')->nullable();
-            $table->string('receipt_number')->nullable();
+            $table->string('receipt_number')->unique()->nullable();
             $table->uuid('created_by');
             $table->timestamps();
         });
@@ -162,14 +164,14 @@ return new class extends Migration {
             $table->foreign('employee_id')->references('id')->on('employees');
             $table->string('position_name'); // Biar tetap terlihat walaupun posisi berubah
             $table->string('work_unit_id')->nullable();
-            $table->foreign('work_unit_id')->references('work_unit_id')->on('work_units')->onDelete('set null');
+            $table->foreign('work_unit_id')->references('id')->on('work_units')->onDelete('set null');
             $table->date('request_date')->nullable();
             $table->char('period', 7)->index(); // Format: "2025-04"
         
             // Tracking siapa yang buat dan approve
             $table->uuid('created_by'); // user_id
             $table->uuid('approved_by')->nullable(); // user_id jika ada persetujuan manual
-            $table->enum('status', ['outstanding', 'pending', 'realized', 'canceled'])->default('outstanding');
+            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'realized', 'received', 'canceled'])->default('draft');
         
             // Tanda terima
             $table->string('receipt_file')->nullable();
@@ -193,6 +195,7 @@ return new class extends Migration {
             $table->foreign('atk_out_request_id')->references('id')->on('atk_out_requests')->onDelete('cascade');
             $table->foreignId('atk_item_id')->constrained('atk_items')->onDelete('restrict');
             $table->integer('qty')->default(0);
+            $table->integer('current_stock_at_request')->default(0);
             $table->timestamps();
             $table->index('atk_item_id');
         });
@@ -201,7 +204,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('atk_item_id')->constrained('atk_items');
             $table->string('work_unit_id')->nullable();
-            $table->foreign('work_unit_id')->references('work_unit_id')->on('work_units')->onDelete('set null');
+            $table->foreign('work_unit_id')->references('id')->on('work_units')->onDelete('set null');
             $table->integer('qty_returned')->default(0);
             $table->date('date');
             $table->string('reason')->nullable();
@@ -211,18 +214,25 @@ return new class extends Migration {
 
         Schema::create('atk_stock_adjustments', function (Blueprint $table) {
             $table->id();
+            $table->date('date');
+            $table->text('note');
+            $table->uuid('adjusted_by');
+            $table->timestamps();
+        });
+
+        Schema::create('atk_stock_adjustment_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('atk_stock_adjustment_id')->constrained()->onDelete('cascade');
             $table->foreignId('atk_item_id')->constrained('atk_items');
             $table->integer('adjustment_qty'); // bisa negatif
             $table->enum('reason_type', ['correction', 'loss', 'expired', 'others'])->default('correction');
-            $table->text('note')->nullable();
-            $table->date('date');
-            $table->uuid('adjusted_by');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('atk_stock_adjustment_items');
         Schema::dropIfExists('atk_stock_adjustments');
         Schema::dropIfExists('atk_returns');
         Schema::dropIfExists('atk_out_request_items');

@@ -79,7 +79,7 @@ class EmployeeSeeder extends Seeder
                     'major'             => 'Manajemen',
                     'position_id'       => 6,
                     'division_id'       => null,
-                    'work_unit_id'      => 5217257000,
+                    'work_unit_id'      => 5217218000,
                     'level'             => 'staff',
                     'grade'             => 'b1',
                     'employment_type'   => 'permanent',

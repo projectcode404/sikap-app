@@ -89,7 +89,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/atk/out-request') }}" class="nav-link {{ Request::is('atk/out-requests*') ? 'active' : '' }}">
+                            <a href="{{ url('/atk/out-requests') }}" class="nav-link {{ Request::is('atk/out-requests*') ? 'active' : '' }}">
                                 <i class="nav-icon fa-solid fa-cart-plus"></i>
                                 <p>{{ __('messages.atk_out_requests') }}</p>
                             </a>

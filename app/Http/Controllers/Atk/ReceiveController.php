@@ -189,11 +189,16 @@ class ReceiveController extends Controller
 
         $poItem->increment('received_qty', $itemData['qty']);
 
+        $beginingStock = $atkItem->current_stock;
+        $endingStock = $beginingStock + $itemData['qty'];
+
         Stock::create([
             'atk_item_id' => $atkItem->id,
             'type' => 'in',
             'qty' => $itemData['qty'],
             'note' => "Receive from PO #{$receive->purchaseOrder->po_number}",
+            'begining_stock' => $beginingStock,
+            'ending_stock' => $endingStock,
         ]);
 
         $atkItem->increment('current_stock', $itemData['qty']);

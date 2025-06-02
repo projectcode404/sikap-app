@@ -25,13 +25,10 @@
         document.addEventListener("DOMContentLoaded", function () {
             const adjustmentsColumn = [
                 { headerName: "ID", field: "id", minWidth: 80, maxWidth: 80, sortable: true },
-                { headerName: "Item Name", field: "item_name", minWidth: 200, sortable: true, filter: true },
-                { headerName: "Unit", field: "unit", minWidth: 100, sortable: true },
-                { headerName: "Qty", field: "adjustment_qty", minWidth: 100, sortable: true },
-                { headerName: "Reason", field: "reason_type", minWidth: 120, sortable: true },
                 { headerName: "Date", field: "date", minWidth: 130, sortable: true },
-                { headerName: "Adjusted By", field: "adjusted_by", minWidth: 180, sortable: true },
                 { headerName: "Note", field: "note", minWidth: 250 },
+                { headerName: "Adjusted By", field: "adjusted_by", minWidth: 180, sortable: true },
+                { headerName: "Items Count", field: "items_count", minWidth: 120, sortable: true },
             ];
 
             initializeAGGrid(".adjustments-grid", adjustmentsColumn, "{{ route('atk.adjustments.api') }}", [
@@ -43,7 +40,13 @@
                     handler: ({ id }) => {
                         window.location.href = `/atk/adjustments/${id}`;
                     }
-                }
+                },
+                { 
+                    type: 'edit', 
+                    title: `{{ __('messages.edit') }}`, 
+                    icon: 'fa-edit', 
+                    class: 'btn-outline-warning',
+                },
             ]);
         });
     </script>

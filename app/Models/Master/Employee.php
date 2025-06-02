@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User\User;
+use App\Models\Master\WrokUnit;
 use App\Models\Master\Division;
 use App\Models\Master\Position;
 
@@ -50,6 +51,10 @@ class Employee extends Model
 
     public function user() {
         return $this->hasOne(User::class, 'employee_id', 'id');
+    }
+
+    public function workUnit() {
+        return $this->belongsTo(WorkUnit::class, 'work_unit_id', 'id');
     }
 
     public function division() {

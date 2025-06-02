@@ -16,6 +16,8 @@ class Stock extends Model
         'atk_item_id',
         'type',
         'qty',
+        'begining_stock',
+        'ending_stock',
         'note',
     ];
 

@@ -10,7 +10,7 @@ class WorkUnitSeeder extends Seeder
     public function run(): void
     {
         $workUnits = [
-            ['work_unit_id' => '5217257000', 'name' => 'CABANG SURABAYA', 'type' => 'office'],
+            ['work_unit_id' => '5217218000', 'name' => 'CABANG SURABAYA', 'type' => 'office'],
             ['work_unit_id' => '5217257001', 'name' => 'SP CANDI', 'type' => 'stock_point'],
             ['work_unit_id' => '5217257002', 'name' => 'SP BABAT', 'type' => 'stock_point'],
             ['work_unit_id' => '5217257004', 'name' => 'SP TUBAN', 'type' => 'stock_point'],
@@ -157,7 +157,7 @@ class WorkUnitSeeder extends Seeder
 
         foreach ($workUnits as $unit) {
             WorkUnit::firstOrCreate(
-                ['work_unit_id' => (string) $unit['work_unit_id']],
+                ['id' => (string) $unit['work_unit_id']],
                 ['name' => $unit['name'], 'type' => $unit['type']]
             );
         }

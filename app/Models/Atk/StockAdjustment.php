@@ -2,30 +2,25 @@
 
 namespace App\Models\Atk;
 
-use App\Models\Master\User;
-use App\Models\Atk\Item;
+use App\Models\User\User;
+use App\Models\Atk\StockAdjustmentItem;
 use Illuminate\Database\Eloquent\Model;
 
-class AtkStockAdjustment extends Model
+class StockAdjustment extends Model
 {
     protected $table = 'atk_stock_adjustments';
 
     protected $fillable = [
-        'atk_item_id',
-        'adjustment_qty',
-        'reason_type',
-        'note',
         'date',
+        'note',
         'adjusted_by',
     ];
 
-    // Relasi ke item
-    public function item()
+    public function items()
     {
-        return $this->belongsTo(Item::class, 'atk_item_id');
+        return $this->hasMany(StockAdjustmentItem::class, 'atk_stock_adjustment_id');
     }
 
-    // Relasi ke user (yang mengoreksi)
     public function adjustedBy()
     {
         return $this->belongsTo(User::class, 'adjusted_by');

@@ -51,9 +51,17 @@ class PurchaseOrderController extends Controller
 
     public function submitGr(Request $request)
     {
+        if (!$request->ajax()) {
+            return abort(404, 'Not Found');
+        }
+
+        if (!$request->isMethod('post')) {
+            return abort(404); // atau 405 Method Not Allowed
+        }
+
         $validated = $request->validate([
             'purchase_order_id' => 'required|exists:atk_purchase_orders,id',
-            'gr_number_sap' => 'required|string|max:50',
+            'gr_number_sap' => 'required|string|max:50|unique:atk_purchase_orders,receipt_number',
         ]);
 
         $po = PurchaseOrder::findOrFail($validated['purchase_order_id']);

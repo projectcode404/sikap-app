@@ -157,7 +157,14 @@ function renderStatusBadge(status) {
         partial: "bg-warning",
         received: "bg-primary",
         completed: "bg-success",
-        canceled: "bg-danger"
+        canceled: "bg-danger",
+        draft : "bg-info",
+        submitted : "bg-primary",
+        approved : "bg-success",
+        rejected : "bg-danger",
+        realized : "bg-warning",
+        received : "bg-success",
+        canceled : "bg-danger",
     };
 
     const badgeClass = classes[status] || "bg-secondary";
@@ -204,6 +211,9 @@ async function initializeAGGrid(gridSelector, columnDefs, apiRoute, actionButton
         pagination: true,
         paginationPageSize: 20,
         rowModelType: 'clientSide',
+
+        getRowId: (params) => String(params.data.id),
+
         context: { actionButtons },
         onGridReady: async function (params) {
             gridDiv.gridApi = params.api;
@@ -251,10 +261,18 @@ function attachEventListeners(gridDiv, apiRoute) {
         const action = button.dataset.action;
         const [module, resource] = window.location.pathname.split('/').filter(Boolean);
         const actionButtons = gridDiv.gridOptions?.context?.actionButtons || [];
-        const handler = actionButtons.find(btn => btn.type === action)?.handler;
+        const rowNode = gridDiv.gridApi.getRowNode(id);
+        const rowData = rowNode?.data;
 
+        const handler = actionButtons.find(btn => btn.type === action)?.handler;
         if (handler && typeof handler === 'function') {
-            handler({ id, module, resource, gridDiv });
+            handler({
+                id,
+                module,
+                resource,
+                gridDiv,
+                row: rowData // ✅ inject full row data
+            });
         } else {
             // default fallback actions
             switch(action) {

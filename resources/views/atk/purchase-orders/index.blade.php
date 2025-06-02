@@ -71,13 +71,16 @@
                     title: 'Good Receipt',
                     icon: 'fa-thumbs-up',
                     class: 'btn-outline-success',
-                    visible: row => row.status == 'received',
-                    handler: ({ id, gridDiv }) => {
-                        const modal = new bootstrap.Modal(document.getElementById('grModal'));
-                        const row = gridDiv.gridApi.getRowNode(id)?.data;
+                    visible: row => row.status === 'received',
+                    handler: ({ id, row }) => {
+                        if (!row) {
+                            showErrorToast('Data tidak ditemukan.');
+                            return;
+                        }
 
+                        const modal = new bootstrap.Modal(document.getElementById('grModal'));
                         document.getElementById('gr_po_id').value = id;
-                        document.getElementById('grModalLabel').textContent = `Good Receive #${row.po_number}`;
+                        document.getElementById('grModalLabel').textContent = `Good Receive #${row.po_number ?? '-'}`;
                         modal.show();
                     }
                 },
@@ -127,13 +130,21 @@
                     body: formData
                 });
 
-                if (!response.ok) throw new Error('Failed to save GR!');
+                if (!response.ok) {
+                    if (response.status === 422) {
+                        const errorData = await response.json();
+                        const firstError = Object.values(errorData.errors || {})[0]?.[0] || 'Failed to save GR!';
+                        showErrorToast(firstError);
+                    } else {
+                        showErrorToast('Something went wrong while saving GR!');
+                    }
+                    return;
+                }
 
                 showSuccessToast('GR saved successfully!');
                 bootstrap.Modal.getInstance(document.getElementById('grModal')).hide();
                 await fetchData(apiRoute, gridDiv);
             } catch (error) {
-                console.error(error);
                 showErrorToast('Failed to save GR!');
             }
         });

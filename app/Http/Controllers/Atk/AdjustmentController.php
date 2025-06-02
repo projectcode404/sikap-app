@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Atk;
 
 use App\Http\Controllers\Controller;
-use App\Models\Atk\Adjustment;
+use App\Models\Atk\StockAdjustment;
+use App\Models\Atk\StockAdjustmentItem;
 use App\Models\Atk\Item;
 use App\Models\Atk\Stock;
 use Illuminate\Http\Request;
@@ -21,25 +22,17 @@ class AdjustmentController extends Controller
             return abort(404, 'Not Found');
         }
 
-        $adjustments = Adjustment::with([
-            'item:id,name,unit',
-            'adjustor.employee:id,full_name'
-        ])->latest()->get();
+        $adjustments = StockAdjustment::with('adjustedBy', 'items.atkItem')->latest()->get();
 
-        $data = $adjustments->map(function ($adj) {
+        return response()->json($adjustments->map(function ($adj) {
             return [
                 'id' => $adj->id,
-                'item_name' => $adj->item->name ?? '-',
-                'unit' => $adj->item->unit ?? '-',
-                'adjustment_qty' => $adj->adjustment_qty,
-                'reason_type' => $adj->reason_type,
-                'note' => $adj->note ?? '-',
-                'date' => $adj->date?->format('Y-m-d'),
-                'adjusted_by' => optional($adj->adjustor?->employee)->full_name ?? '-',
+                'date' => $adj->date,
+                'note' => $adj->note,
+                'adjusted_by' => $adj->adjustedBy->employee->full_name ?? '-',
+                'items_count' => $adj->items->count(),
             ];
-        });
-
-        return response()->json($data);
+        }));
     }
 
     public function index()
@@ -49,73 +42,110 @@ class AdjustmentController extends Controller
 
     public function create()
     {
-        $atkItems = Item::all();
-        return view('atk.adjustments.create', compact('atkItems'));
+        $atkItems = Item::all()->keyBy('id');
+        
+        return view('atk.adjustments.create', [
+            'atkItem' => fn($id) => $atkItems[$id] ?? null,
+        ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'atk_item_id' => 'required|exists:atk_items,id',
-            'adjustment_qty' => 'required|integer|not_in:0',
-            'reason_type' => 'required|in:correction,loss,expired,others',
-            'note' => 'nullable|string',
             'date' => 'required|date',
+            'note' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.atk_item_id' => 'required|exists:atk_items,id',
+            'items.*.adjustment_qty' => 'required|integer|not_in:0',
+            'items.*.reason_type' => 'required|in:correction,loss,expired,others',
         ]);
 
         DB::beginTransaction();
 
         try {
-            $adjustment = Adjustment::create([
-                'atk_item_id' => $validated['atk_item_id'],
-                'adjustment_qty' => $validated['adjustment_qty'],
-                'reason_type' => $validated['reason_type'],
-                'note' => $validated['note'] ?? null,
+            $adjustment = StockAdjustment::create([
                 'date' => Carbon::parse($validated['date']),
+                'note' => $validated['note'],
                 'adjusted_by' => Auth::id(),
             ]);
 
-            Stock::create([
-                'atk_item_id' => $adjustment->atk_item_id,
-                'type' => 'adjustment',
-                'qty' => $adjustment->adjustment_qty,
-                'note' => "Adjustment: {$adjustment->reason_type}",
-            ]);
+            foreach ($validated['items'] as $itemData) {
+                $atkItemId = $itemData['atk_item_id'];
+                $adjustQty = $itemData['adjustment_qty'];
 
-            $adjustment->item->increment('current_stock', $adjustment->adjustment_qty);
+                // Ambil ending_stock terakhir dari stok item tersebut
+                $lastStock = Stock::where('atk_item_id', $atkItemId)->latest('id')->first();
+
+                if ($lastStock) {
+                    $beginingStock = $lastStock->ending_stock;
+                } else {
+                    $item = Item::findOrFail($atkItemId);
+                    $beginingStock = $item->current_stock ?? 0;
+                }
+                $endingStock = $beginingStock + $adjustQty;
+
+                if ($endingStock < 0) {
+                    throw ValidationException::withMessages([
+                        'items' => ["Adjustment causes negative stock for item ID: $atkItemId."]
+                    ]);
+                }
+
+                // Simpan ke tabel adjustment_items
+                StockAdjustmentItem::create([
+                    'atk_stock_adjustment_id' => $adjustment->id,
+                    'atk_item_id' => $atkItemId,
+                    'adjustment_qty' => $adjustQty,
+                    'reason_type' => $itemData['reason_type'],
+                ]);
+
+                // Simpan ke tabel stocks
+                Stock::create([
+                    'atk_item_id' => $atkItemId,
+                    'type' => 'adjustment',
+                    'qty' => $adjustQty,
+                    'begining_stock' => $beginingStock,
+                    'ending_stock' => $endingStock,
+                    'note' => "Adjustment: {$itemData['reason_type']}",
+                ]);
+
+                // ✅ Update current_stock di tabel atk_items
+                Item::where('id', $atkItemId)->increment('current_stock', $adjustQty);
+            }
 
             DB::commit();
-            return redirect()->route('atk.adjustments.index')->with('success', 'Adjustment saved successfully.');
+            return redirect()->route('atk.adjustments.index')->with('success', 'Stock adjustment saved successfully.');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Adjustment error', ['error' => $e->getMessage()]);
-            return back()->withErrors(['error' => 'Failed to save adjustment.'])->withInput();
+            Log::error('Failed to save stock adjustment', ['error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Adjustment failed to save.'])->withInput();
         }
     }
 
-    public function show(Adjustment $adjustment)
+    public function show(StockAdjustment $adjustment)
     {
-        $adjustment->load('item');
+        $adjustment->load('items.atkItem:id,name,unit', 'adjustedBy.employee:id,full_name');
+
         return view('atk.adjustments.show', compact('adjustment'));
     }
 
-    public function edit(Adjustment $adjustment)
+    public function edit(StockAdjustment $adjustment)
     {
-        $adjustment->load('item');
-        return view('atk.adjustments.edit', compact('adjustment'));
+        $adjustment->load('items.atkItem', 'adjustedBy.employee');
+        return view('atk.adjustments.create', compact('adjustment'));
     }
 
-    public function update(Request $request, Adjustment $adjustment)
+    public function update(Request $request, StockAdjustment $adjustment)
     {
-        $validated = $request->validate([
-            'note' => 'nullable|string',
+        $request->validate([
+            'note' => ['nullable', 'string'],
         ]);
 
         $adjustment->update([
-            'note' => $validated['note'],
+            'note' => $request->note,
         ]);
 
-        return redirect()->route('atk.adjustments.index')->with('success', 'Note updated successfully.');
+        return redirect()->route('atk.adjustments.index')->with('success', 'Adjusment note updated successfully.');
     }
 
     // Note: No destroy() to preserve audit trail

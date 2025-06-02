@@ -6,6 +6,7 @@ use App\Http\Controllers\Atk\ItemController;
 use App\Http\Controllers\Atk\PurchaseOrderController;
 use App\Http\Controllers\Atk\ReceiveController;
 use App\Http\Controllers\Atk\AdjustmentController;
+use App\Http\Controllers\Atk\OutRequestController;
 
 Route::prefix('atk')->name('atk.')->middleware(['auth'])->group(function () {
     Route::middleware(['role:superadmin'])->group(function () {
@@ -18,7 +19,7 @@ Route::prefix('atk')->name('atk.')->middleware(['auth'])->group(function () {
         Route::get('purchase-orders/api', [PurchaseOrderController::class, 'getPurchaseOrders'])->name('purchase-orders.api');
         // Route::get('purchase-orders/atk-items', [PurchaseOrderController::class, 'getAtkItems'])->name('get-atk-items');
         Route::get('purchase-orders/suppliers', [SupplierController::class, 'getSuppliers'])->name('get-suppliers');
-        Route::post('purchase-orders/gr', [PurchaseOrderController::class, 'submitGr'])->name('purchase-orders.gr');
+        Route::post('/atk/purchase-orders/submit-gr', [PurchaseOrderController::class, 'submitGr'])->name('purchase-orders.gr');
         Route::resource('purchase-orders', PurchaseOrderController::class)->parameters(['purchase-orders' => 'purchaseOrder']);
 
         // Receive
@@ -34,8 +35,14 @@ Route::prefix('atk')->name('atk.')->middleware(['auth'])->group(function () {
         Route::get('adjustments/api', [AdjustmentController::class, 'getAdjustments'])->name('adjustments.api');
         Route::get('adjustments', [AdjustmentController::class, 'index'])->name('adjustments.index');
         Route::get('adjustments/create', [AdjustmentController::class, 'create'])->name('adjustments.create');
-        Route::post('adjustments', [AdjustmentController::class, 'store'])->name('adjustments.store');
+        Route::post('adjustments/store', [AdjustmentController::class, 'store'])->name('adjustments.store');
         Route::get('adjustments/{adjustment}', [AdjustmentController::class, 'show'])->name('adjustments.show');
+        Route::get('adjustments/{adjustment}/edit', [AdjustmentController::class, 'edit'])->name('adjustments.edit');
+        Route::patch('adjustments/{adjustment}/update', [AdjustmentController::class, 'update'])->name('adjustments.update');
+
+        //Out Requests
+        Route::get('out-requests/api', [OutRequestController::class, 'getOutRequests'])->name('out-requests.api');
+        Route::resource('out-requests', OutRequestController::class)->parameters(['out-requests' => 'outRequest']);
     });
     
 });

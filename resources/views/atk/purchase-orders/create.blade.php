@@ -29,7 +29,7 @@
                                     <strong>Supplier Name <span class="text-danger">*</span></strong>
                                 </label>
                                 <select id="supplier_id" name="supplier_id" class="form-control tom-select @error('supplier_id') is-invalid @enderror" required>
-                                    <option value="">-- Pilih Supplier --</option>
+                                    <option value="">-- Select Supplier --</option>
                                     @foreach ($suppliers as $id => $name)
                                         <option value="{{ $id }}"
                                             @if (old('supplier_id', $purchaseOrder->supplier_id ?? '') == $id) selected @endif>
@@ -125,11 +125,11 @@
                             <div class="d-flex gap-2">
                                 @if(!isset($purchaseOrder))
                                 <button type="submit" id="createBtn" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane me-1"></i> Submit
+                                    <i class="fas fa-paper-plane me-1"></i> Create Purchase Order
                                 </button>
                                 @else
                                 <button type="submit" id="updateBtn" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i> Update
+                                    <i class="fas fa-save me-1"></i> Update Purchase Order
                                 </button>
                                 @endif
                             </div>

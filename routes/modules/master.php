@@ -23,6 +23,7 @@ Route::prefix('master')->name('master.')->middleware(['auth'])->group(function (
 
         // Work Units
         Route::get('work-units/api', [WorkUnitController::class, 'getWorkUnits'])->name('work-units.api');
+        Route::get('/master/get-work-units', [WorkUnitController::class, 'getWorkUnitSelect'])->name('work-units.select');
         Route::resource('work-units', WorkUnitController::class)->parameters(['work-units' => 'work_unit']);
 
         // Suppliers
