@@ -10,6 +10,7 @@ use App\Models\Atk\ReceiveItem;
 use App\Models\Atk\Stock;
 use App\Models\Atk\Item;
 use App\Models\Master\Supplier;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;

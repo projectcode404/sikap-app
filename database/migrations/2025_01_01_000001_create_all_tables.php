@@ -167,11 +167,15 @@ return new class extends Migration {
             $table->foreign('work_unit_id')->references('id')->on('work_units')->onDelete('set null');
             $table->date('request_date')->nullable();
             $table->char('period', 7)->index(); // Format: "2025-04"
+            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'received', 'canceled'])->default('draft');
         
-            // Tracking siapa yang buat dan approve
+            // Tracking siapa yang buat, approve dan reject
             $table->uuid('created_by'); // user_id
-            $table->uuid('approved_by')->nullable(); // user_id jika ada persetujuan manual
-            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'realized', 'received', 'canceled'])->default('draft');
+            $table->uuid('approved_by')->nullable();
+            $table->uuid('rejected_by')->nullable();
+            $table->text('request_note')->nullable();
+            $table->text('approval_note')->nullable();
+            $table->text('canceled_reason')->nullable();
         
             // Tanda terima
             $table->string('receipt_file')->nullable();
@@ -179,10 +183,9 @@ return new class extends Migration {
             $table->timestamp('received_at')->nullable();
 
             // Tambahan kolom log
-            $table->text('remarks')->nullable();
-            $table->string('canceled_reason')->nullable();
+            $table->timestamp('approved_at')->nullable();
+            $table->timestamp('rejected_at')->nullable();
             $table->timestamp('canceled_at')->nullable();
-            $table->timestamp('restored_at')->nullable();
         
             $table->timestamps();
             $table->index(['period', 'status']);
@@ -196,6 +199,8 @@ return new class extends Migration {
             $table->foreignId('atk_item_id')->constrained('atk_items')->onDelete('restrict');
             $table->integer('qty')->default(0);
             $table->integer('current_stock_at_request')->default(0);
+            $table->integer('qty_approved')->nullable();
+            $table->integer('qty_realized')->nullable();
             $table->timestamps();
             $table->index('atk_item_id');
         });

@@ -58,27 +58,25 @@
                     visible: row => row.status == 'draft'
                 },
                 {
-                    type: 'approve',
-                    title: 'Approve',
-                    icon: 'fa-check',
+                    type: 'review',
+                    title: 'Review',
+                    icon: 'fa-file-alt',
                     class: 'btn-outline-success',
                     visible: row => row.status === 'submitted',
                     handler: ({ id }) => {
-                        if (confirm("Yakin ingin menyetujui dan memproses permintaan ini?")) {
-                            window.location.href = `/atk/out-requests/${id}/approve`;
-                        }
+                        window.location.href = `/atk/out-requests/${id}/review`;
                     }
                 },
                 {
-                    type: 'cancel',
-                    title: 'Reject',
-                    icon: 'fa-times',
-                    class: 'btn-outline-danger',
-                    visible: row => row.status === 'submitted',
+                    type: 'print',
+                    title: 'Print',
+                    icon: 'fa-print',
+                    class: 'btn-outline-success',
+                    visible: row => ['approved','realized','received'].includes(row.status),
                     handler: ({ id }) => {
-                        window.location.href = `/atk/out-requests/${id}/cancel`;
+                        window.open(`/atk/out-requests/${id}/print`, '_blank');
                     }
-                }
+                },
             ], "Actions");
         });
     </script>

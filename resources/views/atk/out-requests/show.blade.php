@@ -1,6 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    use Illuminate\Support\Carbon;
+
+    $statusColor = [
+        'draft'     => 'secondary',
+        'submitted' => 'info',
+        'approved'  => 'success',
+        'rejected'  => 'danger',
+        'realized'  => 'primary',
+        'received'  => 'primary',
+        'canceled'  => 'dark',
+    ];
+    $color = $statusColor[$outRequest->status] ?? 'secondary';
+@endphp
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -11,75 +25,73 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><strong>Work Unit</strong></label>
-                            <div class="form-control-plaintext">
-                                {{ $userWorkUnit->name ?? '' }}
+                    <div class="row g-2 mb-4">
+                        <h5 class="mb-3"><strong>Request Information</strong></h5>
+                        <div class="row row-cols-1 row-cols-md-2 g-3">
+                            <div>
+                                <strong>Created By</strong><br>{{ $outRequest->createdBy->employee->full_name ?? '-' }}
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"><strong>Request Date</strong></label>
-                            <div class="form-control-plaintext">
-                                {{ $outRequest->request_date ?? '' }}
+                            <div>
+                                <strong>Work Unit</strong><br>{{ $outRequest->workUnit->name ?? '-' }}
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"><strong>Remarks</strong></label>
-                            <div class="form-control-plaintext">
-                                {{ $outRequest->remarks ?? '' }}
+                            <div>
+                                <strong>Request Date</strong><br>
+                                {{ $outRequest->request_date ? Carbon::parse($outRequest->request_date)->translatedFormat('d F Y') : '-' }}
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"><strong>Created By</strong></label>
-                            <div class="form-control-plaintext">
-                                {{ $outRequest->createdBy->employee->full_name ?? '' }}
+                            <div>
+                                <strong>Period</strong><br>
+                                {{ $outRequest->period ? Carbon::createFromFormat('Y-m', $outRequest->period)->translatedFormat('F Y') : '-' }}
+                            </div>
+                            <div>
+                                <strong>Request Note</strong><br><span style="white-space: pre-line;">{{ $outRequest->request_note ?? '-' }}</span>
+                            </div>
+                            <div>
+                                <strong>Approval Note</strong><br><span style="white-space: pre-line;">{{ $outRequest->approval_note ?? '-' }}</span>
+                            </div>
+                            <div>
+                                <strong>Status</strong><br>
+                                <span class="badge rounded-pill bg-{{ $color }} text-capitalize">
+                                    {{ $outRequest->status ?? '-' }}
+                                </span>
+                                @if($outRequest->approved_by)
+                                    <span class="text-muted">by {{ $outRequest->approvedBy->employee->full_name ?? '-' }}</span>
+                                @endif
                             </div>
                         </div>
                     </div>
 
                     <div class="row g2">
-                        <div class="col-md-12 mb-3">
-                            <h3>Item Request List</h3>
-                            <table class="table table-bordered table-hover">
-                                <thead>
+                        <div class="col-md-12 mb-3 table-responsive">
+                            <hr class="my-4">
+                            <h5 class="mb-3"><strong>Item Request List</strong></h5>
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table text-center">
                                     <tr>
-                                        <th>ATK</th>
+                                        <th style="width: 30%;">ATK</th>
                                         <th>Units</th>
-                                        <th>Current Stock</th>
-                                        <th>Qty</th>
+                                        <th>Remaining Stock</th>
+                                        <th>Qty Requested</th>
+                                        @if(in_array($outRequest->status, ['approved', 'realized', 'received']))
+                                            <th>Qty Approved</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($outRequest->items ?? [] as $i => $item)
+                                    @forelse($outRequest->items as $item)
                                     <tr>
-                                        <td>
-                                            <div class="form-control-plaintext">
-                                                {{ $atkItem($item->atk_item_id)->name ?? 'Item Not Found' }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-control-plaintext">
-                                                {{ $item->atkItem->unit ?? '' }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-control-plaintext">
-                                                {{ $item->current_stock_at_request }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-control-plaintext">
-                                                {{ $item->qty }}
-                                            </div>
-                                        </td>
+                                        <td>{{ $atkItem($item->atk_item_id)->name ?? 'Item Not Found' }}</td>
+                                        <td class="text-center">{{ $item->atkItem->unit ?? '' }}</td>
+                                        <td class="text-center">{{ $item->current_stock_at_request }}</td>
+                                        <td class="text-center">{{ $item->qty }}</td>
+                                        @if(in_array($outRequest->status, ['approved', 'realized', 'received']))
+                                            <td class="text-center">{{ $item->qty_approved }}</td>
+                                        @endif
                                     </tr>
-                                    @endforeach
-                                    @if(empty($outRequest->items) || count($outRequest->items) === 0)
+                                    @empty
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">No items found.</td>
+                                        <td colspan="5" class="text-center text-muted">No items found.</td>
                                     </tr>
-                                    @endif
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -90,6 +102,13 @@
                         <div class="col d-flex justifiy-content-start">
                             <a href="{{ route('atk.out-requests.index') }}" class="btn btn-outline-primary">Back</a>
                         </div>
+                        @if(in_array($outRequest->status, ['approved', 'realized', 'received']))
+                        <div class="col d-flex justify-content-end gap-2">
+                            <a href="{{ route('atk.out-requests.print', $outRequest->id) }}" target="_blank" class="btn btn-success">
+                                <i class="fas fa-print me-1"></i>Print
+                            </a>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

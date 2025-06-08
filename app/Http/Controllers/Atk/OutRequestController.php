@@ -8,11 +8,12 @@ use App\Models\Atk\OutRequest;
 use App\Models\Atk\OutRequestItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class OutRequestController extends Controller
 {
@@ -35,16 +36,123 @@ class OutRequestController extends Controller
                 'employee_name' => $req->employee->full_name ?? null,
                 'position_name' => $req->position_name,
                 'work_unit' => $req->workUnit->name ?? '-',
-                'request_date' => $req->request_date,
-                'period' => $req->period,
+                'request_date' => Carbon::parse($req->request_date)->translatedFormat('d F Y'), // e.g. 08 June 2025
+                'period' => Carbon::createFromFormat('Y-m', $req->period)->translatedFormat('F Y'), // e.g. June 2025
                 'created_by' => $req->createdBy->employee->full_name ?? null,
                 'approved_by' => $req->approvedBy->employee->full_name ?? null,
                 'status' => $req->status,
-                'remarks' => $req->remarks,
+                'request_note' => $req->request_note,
             ];
         });
 
         return response()->json($data);
+    }
+
+    public function handleAction(Request $request, OutRequest $outRequest)
+    {
+        $action = $request->input('action');
+
+        if ($action === 'approve') {
+            // 1. Validasi standar terlebih dahulu
+            $validated = $request->validate([
+                'items' => 'required|array',
+                'items.*.qty_approved' => 'required|integer|min:0',
+                'approval_note' => 'nullable|string',
+            ]);
+
+            // 2. Validasi logika bisnis qty_approved <= stock tersedia
+            $itemsInput = $validated['items'];
+            $items = $outRequest->items()->with('atkItem')->get()->keyBy('id');
+            $errors = [];
+
+            foreach ($itemsInput as $itemId => $itemData) {
+                $approved = (int)($itemData['qty_approved'] ?? 0);
+                $available = (int)($items[$itemId]?->atkItem?->current_stock ?? 0);
+                $name = $items[$itemId]?->atkItem?->name ?? 'Unknown Item';
+
+                if ($approved > $available) {
+                    $errors[] = "$name: Approved ($approved) > Available ($available)";
+                }
+            }
+
+            if (!empty($errors)) {
+                return redirect()
+                    ->route('atk.out-requests.review', $outRequest)
+                    ->with('approval_errors', $errors)
+                    ->withInput();
+            }
+
+            $this->approveRequest($request, $outRequest);
+            return redirect()->route('atk.out-requests.index')->with('success', 'Request approved.');
+        }
+
+        if ($action === 'reject') {
+            $request->validate([
+                'approval_note' => 'required|string',
+            ]);
+
+            $this->rejectRequest($request, $outRequest);
+            return redirect()->route('atk.out-requests.index')->with('warning', 'Request rejected.');
+        }
+
+        return back()->with('error', 'Invalid action.');
+    }
+
+    protected function approveRequest(Request $request, OutRequest $outRequest): void
+    {
+        // Update status utama
+        $outRequest->update([
+            'status'        => 'approved',
+            'approved_by'   => auth()->id(),
+            'approved_at'   => now(),
+            'approval_note' => $request->input('approval_note'),
+        ]);
+
+        // Ambil dan siapkan data
+        $updateData = collect($request->input('items', []))
+            ->filter(fn($item) => isset($item['qty_approved']))
+            ->map(fn($item, $id) => [
+                'id' => (int) $id,
+                'qty_approved' => (int) $item['qty_approved'],
+            ]);
+
+        // Extract arrays untuk digunakan di query
+        $ids = $updateData->pluck('id')->all();
+        $qtys = $updateData->pluck('qty_approved')->all();
+
+        // Jalankan bulk update jika ada data
+        if (!empty($ids) && !empty($qtys)) {
+            $idsString = '{' . implode(',', $ids) . '}';
+            $qtysString = '{' . implode(',', $qtys) . '}';
+
+            DB::statement("
+                UPDATE atk_out_request_items AS a
+                SET qty_approved = b.qty_approved
+                FROM (
+                    SELECT UNNEST(:ids::int[]) AS id, UNNEST(:qtys::int[]) AS qty_approved
+                ) AS b
+                WHERE a.id = b.id
+                AND a.atk_out_request_id = :out_request_id
+            ", [
+                'ids' => $idsString,
+                'qtys' => $qtysString,
+                'out_request_id' => $outRequest->id,
+            ]);
+        }
+    }
+
+    protected function rejectRequest(Request $request, OutRequest $outRequest): void
+    {
+        DB::transaction(function () use ($request, $outRequest) {
+            $outRequest->update([
+                'status'           => 'rejected',
+                'rejected_by'      => auth()->id(),
+                'rejected_at'      => now(),
+                'approval_note'    => $request->input('approval_note'),
+            ]);
+
+            $outRequest->items()->update(['qty_approved' => 0]);
+        });
     }
 
     public function index()
@@ -72,24 +180,70 @@ class OutRequestController extends Controller
         ]);
     }
 
+    public function print(OutRequest $outRequest)
+    {
+        $allowedStatuses = ['approved', 'realized', 'received'];
+
+        if (!in_array($outRequest->status, $allowedStatuses)) {
+            return redirect()->route('atk.out-requests.index')
+                            ->with('error', 'Tanda terima hanya bisa dicetak untuk permintaan yang sudah disetujui.');
+        }
+
+        $outRequest->load(['items.atkItem', 'createdBy.employee', 'workUnit']);
+
+        return view('atk.out-requests.print', compact('outRequest'));
+    }
+
+    public function review(OutRequest $outRequest)
+    {
+        if ($outRequest->status !== 'submitted') {
+            return redirect()
+                ->route('atk.out-requests.index')
+                ->with('error', 'Cannot review Request with status ' . $outRequest->status);
+        }
+
+        $outRequest->load(['items', 'employee', 'workUnit']);
+        $atkItems = Item::all()->keyBy('id');
+
+        return view('atk.out-requests.review', [
+            'outRequest' => $outRequest,
+            'atkItem' => fn($id) => $atkItems[$id] ?? null,
+        ]);
+    }
+
     public function create()
     {
         $atkItems = Item::all()->keyBy('id');
         $user = auth()->user()->load('employee.workUnit');
-        $userWorkUnit = $user->employee?->workUnit;
+
+        $periods = collect([
+            now()->subMonths(1)->format('Y-m'),
+            now()->format('Y-m'),
+            now()->addMonth()->format('Y-m'),
+        ]);
         
         return view('atk.out-requests.create', [
             'atkItem' => fn($id) => $atkItems[$id] ?? null,
-            'userWorkUnit' => $userWorkUnit,
+            'periods' => $periods->map(fn($p) => [
+                'value' => $p,
+                'label' => \Carbon\Carbon::createFromFormat('Y-m', $p)->translatedFormat('F Y'),
+            ]),
         ]);
     }
 
     public function store(Request $request)
     {
+        $periods = collect([
+            now()->subMonths(1)->format('Y-m'),
+            now()->format('Y-m'),
+            now()->addMonth()->format('Y-m'),
+        ]);
+
         $validated = $request->validate([
             'work_unit_id' => 'required|exists:work_units,id',
             'request_date' => 'required|date',
-            'remarks' => 'required|string',
+            'period' => ['required', Rule::in($periods)],
+            'request_note' => 'required|string',
             'items' => 'required|array|min:1',
             'items.*.atk_item_id' => 'required|exists:atk_items,id',
             'items.*.qty' => 'required|integer|min:1',
@@ -113,8 +267,8 @@ class OutRequestController extends Controller
                 'position_name' => optional($employee->position)->name ?? '-',
                 'work_unit_id' => $validated['work_unit_id'],
                 'request_date' => Carbon::parse($validated['request_date']),
-                'period' => Carbon::parse($validated['request_date'])->format('Y-m'),
-                'remarks' => $validated['remarks'] ?? null,
+                'period' => $validated['period'],
+                'request_note' => $validated['request_note'] ?? null,
                 'status' => $status ? 'submitted' : 'draft',
                 'created_by' => $user->id,
                 'created_at' => now(),
@@ -161,22 +315,36 @@ class OutRequestController extends Controller
 
         $outRequest->load(['items', 'employee', 'workUnit']);
         $atkItems = Item::all()->keyBy('id');
-        $user = auth()->user()->load('employee.workUnit');
-        $userWorkUnit = $user->employee?->workUnit;
+
+        $periods = collect([
+            now()->subMonths(1)->format('Y-m'),
+            now()->format('Y-m'),
+            now()->addMonth()->format('Y-m'),
+        ]);
 
         return view('atk.out-requests.create', [
             'outRequest' => $outRequest,
             'atkItem' => fn($id) => $atkItems[$id] ?? null,
-            'userWorkUnit' => $userWorkUnit,
+            'periods' => $periods->map(fn($p) => [
+                'value' => $p,
+                'label' => \Carbon\Carbon::createFromFormat('Y-m', $p)->translatedFormat('F Y'),
+            ]),
         ]);
     }
 
     public function update(Request $request, OutRequest $outRequest)
     {
+        $periods = collect([
+            now()->subMonths(1)->format('Y-m'),
+            now()->format('Y-m'),
+            now()->addMonth()->format('Y-m'),
+        ]);
+
         $validated = $request->validate([
             'work_unit_id' => 'required|exists:work_units,id',
             'request_date' => 'required|date',
-            'remarks' => 'required|string',
+            'period' => ['required', Rule::in($periods)],
+            'request_note' => 'required|string',
             'items' => 'required|array|min:1',
             'items.*.atk_item_id' => 'required|exists:atk_items,id',
             'items.*.qty' => 'required|integer|min:1',
@@ -204,8 +372,8 @@ class OutRequestController extends Controller
                 'position_name' => optional($employee->position)->name ?? '-',
                 'work_unit_id' => $validated['work_unit_id'],
                 'request_date' => Carbon::parse($validated['request_date']),
-                'period' => Carbon::parse($validated['request_date'])->format('Y-m'),
-                'remarks' => $validated['remarks'] ?? null,
+                'period' => $validated['period'],
+                'request_note' => $validated['request_note'] ?? null,
                 'status' => $status ? 'submitted' : 'draft',
                 'updated_by' => $user->id,
                 'updated_at' => now(),

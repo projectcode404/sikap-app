@@ -22,11 +22,11 @@
                                 <select name="work_unit_id" id="work_unit_id" class="form-select" required>
                                     @if(old('work_unit_id') && old('work_unit_name'))
                                         <option value="{{ old('work_unit_id') }}" selected>{{ old('work_unit_name') }}</option>
-                                    @elseif(isset($userWorkUnit))
-                                        <option value="{{ $userWorkUnit->id }}" selected>{{ $userWorkUnit->name }}</option>
+                                    @elseif(isset($outRequest))
+                                        <option value="{{ $outRequest->workUnit->id }}" selected>{{ $outRequest->workUnit->name }}</option>
                                     @endif
                                 </select>
-                                <input type="hidden" name="work_unit_name" id="work_unit_name" value="{{ old('work_unit_name', $userWorkUnit->name ?? '') }}">
+                                <input type="hidden" name="work_unit_name" id="work_unit_name" value="{{ old('work_unit_name', $outRequest->workUnit->name ?? '') }}">
                             </div>
                             <div class="col-md-6">
                                 <label for="request_date" class="form-label"><strong>Request Date</strong></label>
@@ -35,9 +35,20 @@
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-12">
-                                <label for="remarks" class="form-label"><strong>Remarks</strong></label>
-                                <textarea name="remarks" id="remarks" class="form-control" placeholder="Permintaan ATK Stock Point Xxxxxx Periode Juni 2025" required>{{ old('remarks', $outRequest->remarks ?? '') }}</textarea>
+                            <div class="col-md-6">
+                                <label for="period" class="form-label"><strong>Period</strong></label>
+                                <select name="period" class="form-select" required>
+                                    <option value="">-- Select Period --</option>
+                                    @foreach($periods as $p)
+                                        <option value="{{ $p['value'] }}" {{ old('period', $outRequest->period ?? '') === $p['value'] ? 'selected' : '' }}>
+                                            {{ $p['label'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="request_note" class="form-label"><strong>Request Note</strong></label>
+                                <textarea name="request_note" id="request_note" class="form-control" placeholder="Permintaan ATK Stock Point Xxxxxx Periode Juni 2025" required>{{ old('request_note', $outRequest->request_note ?? '') }}</textarea>
                             </div>
                         </div>
 
@@ -49,7 +60,7 @@
                                         <tr>
                                             <th>ATK</th>
                                             <th>Units</th>
-                                            <th>Current Stock</th>
+                                            <th>Remaining Stock</th>
                                             <th>Qty</th>
                                             <th>#</th>
                                         </tr>
@@ -85,7 +96,7 @@
                                                 <input type="number" name="items[{{ $i }}][current_stock]" id="stock-{{ $i }}" class="form-control" min="0" value="{{ $item['current_stock'] ?? '' }}" required>
                                             </td>
                                             <td>
-                                                    <input type="number" name="items[{{ $i }}][qty]" class="form-control" min="1" value="{{ $item['qty'] ?? '' }}" required>
+                                                <input type="number" name="items[{{ $i }}][qty]" class="form-control" min="1" value="{{ $item['qty'] ?? '' }}" required>
                                             </td>
                                             <td>
                                                 <button type="button" class="btn btn-link btn-sm remove-row"><i class="fas fa-remove"></i></button>

@@ -15,6 +15,8 @@ class OutRequestItem extends Model
         'atk_item_id',
         'qty',
         'current_stock_at_request',
+        'qty_approved',
+        'qty_realized',
     ];
 
     public function adjustment()

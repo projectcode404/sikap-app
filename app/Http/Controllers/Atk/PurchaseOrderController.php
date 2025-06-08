@@ -10,6 +10,7 @@ use App\Models\Atk\ReceiveItem;
 use App\Models\Atk\Stock;
 use App\Models\Atk\Item;
 use App\Models\Master\Supplier;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
@@ -33,8 +34,8 @@ class PurchaseOrderController extends Controller
             return [
                 'id' => $po->id,
                 'po_number' => $po->po_number,
-                'po_date' => $po->po_date,
-                'schedule_date' => $po->schedule_date,
+                'po_date' => Carbon::parse($po->po_date)->translatedFormat('d F Y'), // e.g. 08 June 2025
+                'schedule_date' => Carbon::parse($po->schedule_date)->translatedFormat('d F Y'), // e.g. 08 June 2025
                 'supplier_name' => $po->supplier->name ?? null,
                 'created_by' => $po->user->employee->full_name ?? null,
                 'status' => $po->status,

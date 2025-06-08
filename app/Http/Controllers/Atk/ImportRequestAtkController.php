@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use App\Models\Master\Employee;
 use App\Models\Atk\RequestAtk;
 use App\Models\Atk\RequestAtkItem;

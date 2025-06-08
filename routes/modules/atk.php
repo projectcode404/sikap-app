@@ -42,6 +42,9 @@ Route::prefix('atk')->name('atk.')->middleware(['auth'])->group(function () {
 
         //Out Requests
         Route::get('out-requests/api', [OutRequestController::class, 'getOutRequests'])->name('out-requests.api');
+        Route::get('out-requests/{outRequest}/review', [OutRequestController::class, 'review'])->name('out-requests.review');
+        Route::get('out-requests/{outRequest}/print', [OutRequestController::class, 'print'])->name('out-requests.print');
+        Route::patch('out-requests/{outRequest}/action', [OutRequestController::class, 'handleAction'])->name('out-requests.action');
         Route::resource('out-requests', OutRequestController::class)->parameters(['out-requests' => 'outRequest']);
     });
     

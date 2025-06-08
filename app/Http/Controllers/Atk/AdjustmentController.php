@@ -11,8 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
 
 class AdjustmentController extends Controller
 {
@@ -27,7 +27,7 @@ class AdjustmentController extends Controller
         return response()->json($adjustments->map(function ($adj) {
             return [
                 'id' => $adj->id,
-                'date' => $adj->date,
+                'date' => Carbon::parse($adj->date)->translatedFormat('d F Y'), // e.g. 08 June 2025
                 'note' => $adj->note,
                 'adjusted_by' => $adj->adjustedBy->employee->full_name ?? '-',
                 'items_count' => $adj->items->count(),
