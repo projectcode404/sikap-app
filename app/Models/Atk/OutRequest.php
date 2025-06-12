@@ -19,25 +19,29 @@ class OutRequest extends Model
 
     protected $fillable = [
         'id',
-        'id_formester',
         'employee_id',
         'position_name',
         'work_unit_id',
         'request_date',
         'period',
         'status',
+
         'created_by',
         'approved_by',
         'rejected_by',
+        'realized_by',
+        'completed_by',
         'request_note',
         'approval_note',
-        'rejection_reason',
         'canceled_reason',
+
         'receipt_file',
-        'printed_at',
         'approved_at',
         'rejected_at',
+        'realized_at',
+        'completed_at',
         'canceled_at',
+        'printed_at',
     ];
 
     public function employee()
@@ -52,12 +56,12 @@ class OutRequest extends Model
 
     public function createdBy()
     {
-        return $this->belongsTo(User::class, 'created_by', 'id');
+        return $this->belongsTo(User::class, 'created_by', 'employee_id');
     }
 
     public function approvedBy()
     {
-        return $this->belongsTo(User::class, 'approved_by', 'id');
+        return $this->belongsTo(User::class, 'approved_by', 'employee_id');
     }
 
     public function items()

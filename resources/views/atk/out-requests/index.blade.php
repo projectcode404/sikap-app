@@ -77,6 +77,16 @@
                         window.open(`/atk/out-requests/${id}/print`, '_blank');
                     }
                 },
+                {
+                    type: 'realize',
+                    title: 'Realize',
+                    icon: 'fa-hand',
+                    class: 'btn-outline-primary',
+                    visible: row => ['approved'].includes(row.status),
+                    handler: ({ id }) => {
+                        window.location.href = `/atk/out-requests/${id}/realize`;
+                    }
+                },
             ], "Actions");
         });
     </script>

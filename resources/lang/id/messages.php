@@ -25,6 +25,8 @@ return [
     'atk_returns' => 'Pengembalian ATK',
     'atk_adjustments' => 'Penyesuaian ATK',
     'users' => 'Pengguna',
+    'roles' => 'Peran',
+    'permissions' => 'Izin Akses',
     'roles_and_permissions' => 'Peran & Izin',
 
     // PO & Receive ATK

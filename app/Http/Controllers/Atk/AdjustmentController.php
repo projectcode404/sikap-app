@@ -66,7 +66,7 @@ class AdjustmentController extends Controller
             $adjustment = StockAdjustment::create([
                 'date' => Carbon::parse($validated['date']),
                 'note' => $validated['note'],
-                'adjusted_by' => Auth::id(),
+                'adjusted_by' => auth()->user()->employee_id,
             ]);
 
             foreach ($validated['items'] as $itemData) {

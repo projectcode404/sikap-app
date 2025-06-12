@@ -48,6 +48,20 @@ services:
     networks:
       - sikap-app-network
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_ui
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: superadmin@sikap.iap
+      PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - sikap-app-network
+
   redis:
     image: redis:latest
     container_name: redis_cache

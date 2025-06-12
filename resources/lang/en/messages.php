@@ -25,6 +25,8 @@ return [
     'atk_returns' => 'Returns',
     'atk_adjustments' => 'Adjustments',
     'users' => 'Users',
+    'roles' => 'Roles',
+    'permissions' => 'Permissions',
     'roles_and_permissions' => 'Roles & Permissions',
 
     // PO & Receive ATK

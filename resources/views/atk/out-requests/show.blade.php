@@ -6,12 +6,12 @@
 
     $statusColor = [
         'draft'     => 'secondary',
-        'submitted' => 'info',
+        'submitted' => 'primary',
         'approved'  => 'success',
         'rejected'  => 'danger',
-        'realized'  => 'primary',
-        'received'  => 'primary',
-        'canceled'  => 'dark',
+        'realized'  => 'warning',
+        'received'  => 'success',
+        'canceled'  => 'danger',
     ];
     $color = $statusColor[$outRequest->status] ?? 'secondary';
 @endphp

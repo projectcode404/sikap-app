@@ -36,8 +36,8 @@ class PurchaseOrderController extends Controller
                 'po_number' => $po->po_number,
                 'po_date' => Carbon::parse($po->po_date)->translatedFormat('d F Y'), // e.g. 08 June 2025
                 'schedule_date' => Carbon::parse($po->schedule_date)->translatedFormat('d F Y'), // e.g. 08 June 2025
-                'supplier_name' => $po->supplier->name ?? null,
-                'created_by' => $po->user->employee->full_name ?? null,
+                'supplier_name' => $po->supplier->name ?? '-',
+                'created_by' => $po->user->employee->full_name ?? '-',
                 'status' => $po->status,
             ];
         });
@@ -148,7 +148,7 @@ class PurchaseOrderController extends Controller
                 'schedule_date' => $validated['schedule_date'] ?? null,
                 'note' => $validated['note'],
                 'status' => 'open',
-                'created_by' => auth()->id(),
+                'created_by' => auth()->user()->employee_id,
             ]);
 
             $itemUnits = Item::whereIn('id', collect($validated['items'])->pluck('atk_item_id'))->pluck('unit', 'id');

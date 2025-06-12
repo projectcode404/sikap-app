@@ -158,7 +158,7 @@ function renderStatusBadge(status) {
         received: "bg-primary",
         completed: "bg-success",
         canceled: "bg-danger",
-        draft : "bg-info",
+        draft : "bg-secondary",
         submitted : "bg-primary",
         approved : "bg-success",
         rejected : "bg-danger",

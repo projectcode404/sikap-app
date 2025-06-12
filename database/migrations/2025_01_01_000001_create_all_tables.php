@@ -120,7 +120,7 @@ return new class extends Migration {
             $table->enum('status', ['open', 'partial', 'received', 'completed', 'canceled'])->default('open');
             $table->string('po_file')->nullable();
             $table->string('receipt_number')->unique()->nullable();
-            $table->uuid('created_by');
+            $table->string('created_by'); // user->employee_id
             $table->timestamps();
         });
 
@@ -137,7 +137,7 @@ return new class extends Migration {
         Schema::create('atk_receives', function (Blueprint $table) {
             $table->id();
             $table->foreignId('atk_purchase_order_id')->constrained('atk_purchase_orders');
-            $table->uuid('received_by');
+            $table->string('received_by'); // user->employee_id
             $table->date('receive_date');
             $table->text('note')->nullable();
             $table->string('receipt_file')->nullable();
@@ -155,9 +155,6 @@ return new class extends Migration {
 
         Schema::create('atk_out_requests', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            
-            // ID Formester, jika permintaan berasal dari import file csv formester
-            $table->string('id_formester')->nullable()->unique();
 
             // Identitas peminta
             $table->string('employee_id'); // FK ke employee_id (bukan PK id)
@@ -167,29 +164,37 @@ return new class extends Migration {
             $table->foreign('work_unit_id')->references('id')->on('work_units')->onDelete('set null');
             $table->date('request_date')->nullable();
             $table->char('period', 7)->index(); // Format: "2025-04"
-            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'received', 'canceled'])->default('draft');
+            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'realized', 'completed', 'canceled'])->default('draft');
         
             // Tracking siapa yang buat, approve dan reject
-            $table->uuid('created_by'); // user_id
-            $table->uuid('approved_by')->nullable();
-            $table->uuid('rejected_by')->nullable();
+            $table->string('created_by'); // user->employee_id
+            $table->string('approved_by')->nullable(); // user->employee_id
+            $table->string('rejected_by')->nullable(); // user->employee_id
+            $table->string('realized_by')->nullable(); // user->employee_id
+            $table->string('completed_by')->nullable(); // user->employee_id
             $table->text('request_note')->nullable();
             $table->text('approval_note')->nullable();
             $table->text('canceled_reason')->nullable();
         
             // Tanda terima
             $table->string('receipt_file')->nullable();
-            $table->timestamp('printed_at')->nullable();
-            $table->timestamp('received_at')->nullable();
 
             // Tambahan kolom log
             $table->timestamp('approved_at')->nullable();
             $table->timestamp('rejected_at')->nullable();
+            $table->timestamp('realized_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->timestamp('canceled_at')->nullable();
+            $table->timestamp('printed_at')->nullable();
         
             $table->timestamps();
             $table->index(['period', 'status']);
             $table->index('employee_id');
+            $table->index('created_by');
+            $table->index('approved_by');
+            $table->index('rejected_by');
+            $table->index('realized_by');
+            $table->index('completed_by');
         });
 
         Schema::create('atk_out_request_items', function (Blueprint $table) {
@@ -213,7 +218,7 @@ return new class extends Migration {
             $table->integer('qty_returned')->default(0);
             $table->date('date');
             $table->string('reason')->nullable();
-            $table->uuid('uploaded_by');
+            $table->string('uploaded_by'); //employee_id
             $table->timestamps();
         });
 
@@ -221,7 +226,7 @@ return new class extends Migration {
             $table->id();
             $table->date('date');
             $table->text('note');
-            $table->uuid('adjusted_by');
+            $table->string('adjusted_by'); //employee_id
             $table->timestamps();
         });
 

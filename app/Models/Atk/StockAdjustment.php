@@ -23,6 +23,6 @@ class StockAdjustment extends Model
 
     public function adjustedBy()
     {
-        return $this->belongsTo(User::class, 'adjusted_by');
+        return $this->belongsTo(User::class, 'adjusted_by', 'employee_id');
     }
 }

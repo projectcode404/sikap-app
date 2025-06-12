@@ -33,13 +33,13 @@ class OutRequestController extends Controller
         $data = $out_requests->map(function ($req) {
             return [
                 'id' => $req->id,
-                'employee_name' => $req->employee->full_name ?? null,
+                'employee_name' => $req->employee->full_name ?? '-',
                 'position_name' => $req->position_name,
                 'work_unit' => $req->workUnit->name ?? '-',
                 'request_date' => Carbon::parse($req->request_date)->translatedFormat('d F Y'), // e.g. 08 June 2025
                 'period' => Carbon::createFromFormat('Y-m', $req->period)->translatedFormat('F Y'), // e.g. June 2025
-                'created_by' => $req->createdBy->employee->full_name ?? null,
-                'approved_by' => $req->approvedBy->employee->full_name ?? null,
+                'created_by' => $req->createdBy->employee->full_name ?? '-',
+                'approved_by' => $req->approvedBy->employee->full_name ?? '-',
                 'status' => $req->status,
                 'request_note' => $req->request_note,
             ];
@@ -103,7 +103,7 @@ class OutRequestController extends Controller
         // Update status utama
         $outRequest->update([
             'status'        => 'approved',
-            'approved_by'   => auth()->id(),
+            'approved_by'   => auth()->user()->employee_id,
             'approved_at'   => now(),
             'approval_note' => $request->input('approval_note'),
         ]);
@@ -146,7 +146,7 @@ class OutRequestController extends Controller
         DB::transaction(function () use ($request, $outRequest) {
             $outRequest->update([
                 'status'           => 'rejected',
-                'rejected_by'      => auth()->id(),
+                'rejected_by'      => auth()->user()->employee_id,
                 'rejected_at'      => now(),
                 'approval_note'    => $request->input('approval_note'),
             ]);
@@ -270,7 +270,7 @@ class OutRequestController extends Controller
                 'period' => $validated['period'],
                 'request_note' => $validated['request_note'] ?? null,
                 'status' => $status ? 'submitted' : 'draft',
-                'created_by' => $user->id,
+                'created_by' => $user->employee->id,
                 'created_at' => now(),
             ]);
 
